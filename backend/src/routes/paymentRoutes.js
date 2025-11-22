@@ -4,7 +4,7 @@ import {
   verifyPayment,
   getAllPayments,
 } from "../controllers/paymentController.js"
-import protect from "../middleware/authmiddleware.js"
+import protect from "../middleware/authMiddleware.js"
 
 const router = express.Router()
 

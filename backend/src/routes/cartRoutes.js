@@ -6,7 +6,7 @@ import {
   removeCartItem,
   clearCart,       // ✅ Import the new controller
 } from "../controllers/cartController.js"
-import protect from "../middleware/authmiddleware.js"
+import protect from "../middleware/authMiddleware.js"
 
 const router = express.Router()
 

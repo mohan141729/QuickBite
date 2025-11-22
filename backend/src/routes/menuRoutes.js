@@ -7,7 +7,7 @@ import {
   deleteMenuItem,
   getAllMenuItems,
 } from "../controllers/menucontroller.js"
-import protect from "../middleware/authmiddleware.js"
+import protect from "../middleware/authMiddleware.js"
 
 const router = express.Router()
 
