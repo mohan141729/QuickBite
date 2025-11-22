@@ -29,6 +29,8 @@ const io = new Server(httpServer, {
       "https://admin.quickbite.in",
       "https://partner.quickbite.in",
       "https://quickbite.in",
+      /^https:\/\/.*\.vercel\.app$/,
+      /^https:\/\/.*\.onrender\.com$/
     ],
     credentials: true,
   },
