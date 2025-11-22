@@ -55,7 +55,16 @@ const allowedOrigins = [
 app.use(
   cors({
     origin: (origin, callback) => {
-      if (!origin || allowedOrigins.includes(origin)) {
+      const allowedRegex = [
+        /^https:\/\/.*\.vercel\.app$/,
+        /^https:\/\/.*\.onrender\.com$/
+      ];
+
+      if (
+        !origin ||
+        allowedOrigins.includes(origin) ||
+        allowedRegex.some(regex => regex.test(origin))
+      ) {
         callback(null, true)
       } else {
         callback(new Error("Not allowed by CORS"))
