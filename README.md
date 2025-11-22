@@ -3,6 +3,16 @@
 ## Overview
 QuickBite is a comprehensive food delivery platform connecting customers, restaurants, and delivery partners. It features a robust backend and four distinct frontend applications to manage the entire lifecycle of a food order.
 
+## Live Demo
+
+| Application | URL | Description |
+| :--- | :--- | :--- |
+| **Customer App** | [Link](https://quick-bite-smoky.vercel.app/) | Browse restaurants, view menus, and place orders. |
+| **Restaurant Dashboard** | [Link](https://restaurant-quickbite.vercel.app/) | Manage menu, orders, and view analytics. |
+| **Admin Dashboard** | [Link](https://admin-quickbite.vercel.app/) | Manage users, restaurants, and monitor platform. |
+| **Delivery App** | [Link](https://deliverypartners-quickbite.vercel.app/) | Receive and fulfill delivery requests. |
+| **Backend API** | [Link](https://quickbite-05uf.onrender.com) | REST API server. |
+
 ## Architecture
 
 The project is structured as a monorepo containing:

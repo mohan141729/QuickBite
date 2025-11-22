@@ -1,4 +1,7 @@
-# QuickBite Delivery App
+# QuickBite Delivery Partner App
+
+## Live URL
+[https://deliverypartners-quickbite.vercel.app/](https://deliverypartners-quickbite.vercel.app/)
 
 The Delivery App is designed for delivery partners to accept and fulfill orders efficiently.
 

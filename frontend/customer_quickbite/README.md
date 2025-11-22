@@ -1,5 +1,8 @@
 # QuickBite Customer App
 
+## Live URL
+[https://quick-bite-smoky.vercel.app/](https://quick-bite-smoky.vercel.app/)
+
 The Customer App allows users to discover restaurants, browse menus, and order food for delivery.
 
 ## Features

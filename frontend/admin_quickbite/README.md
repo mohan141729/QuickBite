@@ -2,6 +2,9 @@
 
 The Admin Dashboard is a comprehensive management tool for QuickBite platform administrators.
 
+## Live URL
+[https://admin-quickbite.vercel.app/](https://admin-quickbite.vercel.app/)
+
 ## Features
 
 - **Dashboard Overview**: Real-time metrics on orders, revenue, and active users.

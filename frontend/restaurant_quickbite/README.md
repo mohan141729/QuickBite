@@ -1,5 +1,8 @@
 # QuickBite Restaurant Dashboard
 
+## Live URL
+[https://restaurant-quickbite.vercel.app/](https://restaurant-quickbite.vercel.app/)
+
 The Restaurant Dashboard empowers restaurant owners to manage their presence on the QuickBite platform.
 
 ## Features
