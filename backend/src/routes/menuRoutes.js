@@ -6,7 +6,7 @@ import {
   updateMenuItem,
   deleteMenuItem,
   getAllMenuItems,
-} from "../controllers/menuController.js"
+} from "../controllers/MenuController.js" // Fixed casing import
 import { clerkAuth, requireRole, attemptAuth } from "../middleware/clerkAuth.js"
 
 const router = express.Router()
