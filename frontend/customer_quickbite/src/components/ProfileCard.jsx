@@ -24,16 +24,32 @@ const ProfileCard = ({ onClose }) => {
     e.preventDefault()
     setSaving(true)
     try {
-      const payload = {
-        name: formData.name,
-        phone: formData.phone,
-        address: [
+      // Create updated address list
+      let updatedAddresses = [...(user?.address || [])]
+
+      if (updatedAddresses.length > 0) {
+        // Update existing primary address
+        updatedAddresses[0] = {
+          ...updatedAddresses[0],
+          line1: formData.line1,
+          city: formData.city,
+          pincode: formData.pincode,
+        }
+      } else {
+        // Create new address if none exist
+        updatedAddresses = [
           {
             line1: formData.line1,
             city: formData.city,
             pincode: formData.pincode,
           },
-        ],
+        ]
+      }
+
+      const payload = {
+        name: formData.name,
+        phone: formData.phone,
+        address: updatedAddresses,
       }
 
       const res = await updateProfile(payload)
