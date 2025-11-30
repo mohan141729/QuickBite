@@ -1,9 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import TopBar from '../components/TopBar';
 import DataTable from '../components/DataTable';
 import { Bike, CheckCircle, XCircle } from 'lucide-react';
 import { getAllDeliveryPartners, updateDeliveryPartnerStatus } from '../api/delivery';
-import toast from 'react-hot-toast';
 
 const DeliveryPartners = () => {
     const [partners, setPartners] = useState([]);
@@ -18,10 +17,15 @@ const DeliveryPartners = () => {
         try {
             setLoading(true);
             const response = await getAllDeliveryPartners();
-            setPartners(response.data || []);
+            // Flatten data for DataTable search
+            const formattedData = (response.data || []).map(partner => ({
+                ...partner,
+                name: partner.user?.name || 'Unknown',
+                email: partner.user?.email || 'No Email'
+            }));
+            setPartners(formattedData);
         } catch (error) {
             console.error('Error fetching delivery partners:', error);
-            toast.error('Failed to load delivery partners');
         } finally {
             setLoading(false);
         }
@@ -30,22 +34,20 @@ const DeliveryPartners = () => {
     const handleStatusUpdate = async (id, status) => {
         try {
             await updateDeliveryPartnerStatus(id, status);
-            toast.success(`Delivery partner ${status} successfully`);
             fetchPartners();
         } catch (error) {
             console.error('Error updating status:', error);
-            toast.error('Failed to update delivery partner status');
         }
     };
 
     const columns = [
         {
-            key: 'user',
+            key: 'name',
             label: 'Partner Name',
-            render: (value) => (
+            render: (value, row) => (
                 <div>
-                    <p className="font-medium text-gray-900">{value?.name || 'N/A'}</p>
-                    <p className="text-sm text-gray-500">{value?.email || 'N/A'}</p>
+                    <p className="font-medium text-gray-900">{value || 'N/A'}</p>
+                    <p className="text-sm text-gray-500">{row.email || 'N/A'}</p>
                 </div>
             ),
         },
@@ -73,8 +75,8 @@ const DeliveryPartners = () => {
             label: 'Status',
             render: (value) => (
                 <span className={`badge ${value === 'approved' ? 'badge-success' :
-                        value === 'rejected' ? 'badge-error' :
-                            'badge-warning'
+                    value === 'rejected' ? 'badge-error' :
+                        'badge-warning'
                     }`}>
                     {value ? value.charAt(0).toUpperCase() + value.slice(1) : 'Pending'}
                 </span>
@@ -132,8 +134,8 @@ const DeliveryPartners = () => {
         <div className="flex-1 bg-gray-50 min-h-screen">
             <TopBar title="Delivery Partners" />
 
-            <div className="pt-16 pl-64">
-                <div className="p-8">
+            <div className="pt-24 px-8 pb-12 animate-fade-in">
+                <div>
                     {/* Header */}
                     <div className="flex items-center justify-between mb-8">
                         <div>
@@ -181,8 +183,8 @@ const DeliveryPartners = () => {
                                         key={status}
                                         onClick={() => setFilterStatus(status)}
                                         className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${filterStatus === status
-                                                ? 'bg-indigo-600 text-white'
-                                                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                            ? 'bg-indigo-600 text-white'
+                                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                                             }`}
                                     >
                                         {status.charAt(0).toUpperCase() + status.slice(1)}

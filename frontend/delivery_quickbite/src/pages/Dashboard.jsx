@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
+import { useSocket } from "../context/SocketContext";
 import api from "../api/axios";
 import toast from "react-hot-toast";
 import Navbar from "../components/Navbar";
@@ -21,6 +22,7 @@ import {
 
 const Dashboard = () => {
     const { user } = useAuth();
+    const { socket } = useSocket();
     const [loading, setLoading] = useState(true);
     const [stats, setStats] = useState({
         todayEarnings: 0,
@@ -35,59 +37,102 @@ const Dashboard = () => {
     const [isOnline, setIsOnline] = useState(true);
     const [actionLoading, setActionLoading] = useState(null);
 
+    // Location Tracking
+    useEffect(() => {
+        let watchId;
+        if (isOnline && activeDelivery && activeDelivery.orderStatus === "on_the_way") {
+            if ("geolocation" in navigator) {
+                watchId = navigator.geolocation.watchPosition(
+                    async (position) => {
+                        const { latitude, longitude } = position.coords;
+                        console.log("📍 Location update:", latitude, longitude);
+
+                        try {
+                            await api.put("/api/delivery/location", {
+                                lat: latitude,
+                                lng: longitude
+                            });
+                        } catch (err) {
+                            console.error("Failed to update location API", err);
+                        }
+
+                        if (socket) {
+                            socket.emit("update-location", {
+                                orderId: activeDelivery._id,
+                                customerId: activeDelivery.user?._id,
+                                location: { lat: latitude, lng: longitude }
+                            });
+                        }
+                    },
+                    (error) => {
+                        console.error("Location error:", error);
+                        toast.error("Please enable location services");
+                    },
+                    { enableHighAccuracy: true, maximumAge: 10000, timeout: 5000 }
+                );
+            }
+        }
+
+        return () => {
+            if (watchId) navigator.geolocation.clearWatch(watchId);
+        };
+    }, [isOnline, activeDelivery, socket]);
+
     // Fetch dashboard data
     useEffect(() => {
         fetchDashboardData();
-    }, []);
+
+        if (socket) {
+            socket.on("new-delivery-request", (data) => {
+                console.log("🔔 New order received:", data);
+                toast("New order available!", { icon: "📦" });
+                fetchDashboardData();
+            });
+
+            socket.on("order-update", (data) => {
+                console.log("🔔 Order updated:", data);
+                fetchDashboardData();
+            });
+
+            return () => {
+                socket.off("new-delivery-request");
+                socket.off("order-update");
+            };
+        }
+    }, [socket]);
 
     const fetchDashboardData = async () => {
         try {
             setLoading(true);
 
-            // Fetch available orders
             const ordersResponse = await api.get("/api/delivery/orders");
-            console.log("Orders response:", ordersResponse.data);
-
-            // Fetch delivery history for recent activity
             const historyResponse = await api.get("/api/delivery/history");
-            console.log("History response:", historyResponse.data);
 
-            // Set available orders (orders that are ready for pickup)
             if (ordersResponse.data && ordersResponse.data.orders) {
-                const available = ordersResponse.data.orders.filter(
-                    order => order.orderStatus === "preparing" || order.orderStatus === "ready"
-                );
-                const active = ordersResponse.data.orders.find(
-                    order => order.orderStatus === "picked_up" || order.orderStatus === "on_the_way"
-                );
+                const allOrders = ordersResponse.data.orders;
+                const available = allOrders.filter(order => !order.deliveryPartner);
+                const active = allOrders.find(order => order.deliveryPartner);
 
                 setAvailableOrders(available);
                 setActiveDelivery(active || null);
             }
 
-            // Set recent activity
             if (historyResponse.data && historyResponse.data.orders) {
                 setRecentActivity(historyResponse.data.orders.slice(0, 5));
 
-                // Calculate stats
                 const today = new Date();
                 today.setHours(0, 0, 0, 0);
-
-                const todayOrders = historyResponse.data.orders.filter(order =>
-                    new Date(order.updatedAt) >= today
-                );
+                const todayOrders = historyResponse.data.orders.filter(order => new Date(order.updatedAt) >= today);
 
                 const weekAgo = new Date();
                 weekAgo.setDate(weekAgo.getDate() - 7);
-                const weekOrders = historyResponse.data.orders.filter(order =>
-                    new Date(order.updatedAt) >= weekAgo
-                );
+                const weekOrders = historyResponse.data.orders.filter(order => new Date(order.updatedAt) >= weekAgo);
 
                 setStats({
-                    todayEarnings: todayOrders.length * 40, // ₹40 per delivery
+                    todayEarnings: todayOrders.length * 40,
                     todayDeliveries: todayOrders.length,
                     weekDeliveries: weekOrders.length,
-                    avgRating: 4.7, // Mock data - would come from backend
+                    avgRating: 4.7,
                     activeOrders: ordersResponse.data.orders?.length || 0,
                 });
             }
@@ -127,12 +172,18 @@ const Dashboard = () => {
         }
     };
 
-    const toggleAvailability = () => {
-        setIsOnline(!isOnline);
-        toast.success(isOnline ? "You are now offline" : "You are now online");
+    const toggleAvailability = async () => {
+        try {
+            const newStatus = !isOnline;
+            await api.put(`/api/delivery/toggle/${user._id}`, { isAvailable: newStatus });
+            setIsOnline(newStatus);
+            toast.success(newStatus ? "You are now online" : "You are now offline");
+        } catch (error) {
+            console.error("Error toggling availability:", error);
+            toast.error("Failed to update availability status");
+        }
     };
 
-    // Loading state
     if (loading) {
         return (
             <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-red-50">
@@ -154,7 +205,6 @@ const Dashboard = () => {
             <Navbar />
 
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                {/* Header Section */}
                 <div className="mb-8 animate-fade-in">
                     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                         <div>
@@ -164,12 +214,11 @@ const Dashboard = () => {
                             <p className="text-gray-600">Here's what's happening with your deliveries today</p>
                         </div>
 
-                        {/* Availability Toggle */}
                         <button
                             onClick={toggleAvailability}
                             className={`flex items-center gap-3 px-6 py-3 rounded-full font-semibold transition-all transform hover:scale-105 ${isOnline
-                                    ? "bg-green-500 text-white shadow-lg shadow-green-500/30"
-                                    : "bg-gray-400 text-white shadow-lg shadow-gray-400/30"
+                                ? "bg-green-500 text-white shadow-lg shadow-green-500/30"
+                                : "bg-gray-400 text-white shadow-lg shadow-gray-400/30"
                                 }`}
                         >
                             <div className={`w-3 h-3 rounded-full ${isOnline ? "bg-white animate-pulse" : "bg-gray-200"}`} />
@@ -178,9 +227,7 @@ const Dashboard = () => {
                     </div>
                 </div>
 
-                {/* Statistics Cards */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                    {/* Today's Earnings */}
                     <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100 card-hover animate-slide-up">
                         <div className="flex items-center justify-between mb-4">
                             <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl flex items-center justify-center">
@@ -195,7 +242,6 @@ const Dashboard = () => {
                         <p className="text-xs text-gray-500 mt-2">{stats.todayDeliveries} deliveries</p>
                     </div>
 
-                    {/* Total Deliveries */}
                     <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100 card-hover animate-slide-up" style={{ animationDelay: "0.1s" }}>
                         <div className="flex items-center justify-between mb-4">
                             <div className="w-12 h-12 bg-gradient-to-br from-orange-500 to-red-600 rounded-xl flex items-center justify-center">
@@ -207,7 +253,6 @@ const Dashboard = () => {
                         <p className="text-xs text-gray-500 mt-2">deliveries completed</p>
                     </div>
 
-                    {/* Average Rating */}
                     <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100 card-hover animate-slide-up" style={{ animationDelay: "0.2s" }}>
                         <div className="flex items-center justify-between mb-4">
                             <div className="w-12 h-12 bg-gradient-to-br from-yellow-500 to-orange-600 rounded-xl flex items-center justify-center">
@@ -223,7 +268,6 @@ const Dashboard = () => {
                         </div>
                     </div>
 
-                    {/* Active Orders */}
                     <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100 card-hover animate-slide-up" style={{ animationDelay: "0.3s" }}>
                         <div className="flex items-center justify-between mb-4">
                             <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center">
@@ -237,10 +281,7 @@ const Dashboard = () => {
                 </div>
 
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                    {/* Main Content - Available Orders & Active Delivery */}
                     <div className="lg:col-span-2 space-y-6">
-
-                        {/* Active Delivery */}
                         {activeDelivery && (
                             <div className="bg-gradient-to-br from-orange-500 to-red-600 rounded-2xl p-6 shadow-xl text-white animate-slide-up">
                                 <div className="flex items-center gap-2 mb-4">
@@ -272,9 +313,16 @@ const Dashboard = () => {
                                 </div>
 
                                 <div className="flex flex-wrap gap-3">
-                                    {activeDelivery.orderStatus === "picked_up" && (
+                                    {activeDelivery.orderStatus === "preparing" && (
+                                        <div className="flex-1 bg-white/20 text-white font-semibold py-3 px-4 rounded-xl flex items-center justify-center gap-2">
+                                            <Clock className="w-5 h-5 animate-pulse" />
+                                            Waiting for Restaurant...
+                                        </div>
+                                    )}
+
+                                    {activeDelivery.orderStatus === "ready" && (
                                         <button
-                                            onClick={() => handleUpdateStatus(activeDelivery._id, "on_the_way")}
+                                            onClick={() => handleUpdateStatus(activeDelivery._id, "picked_up")}
                                             disabled={actionLoading === activeDelivery._id}
                                             className="flex-1 bg-white text-orange-600 font-semibold py-3 px-4 rounded-xl hover:bg-gray-100 transition-all flex items-center justify-center gap-2"
                                         >
@@ -282,14 +330,14 @@ const Dashboard = () => {
                                                 <Loader2 className="w-5 h-5 animate-spin" />
                                             ) : (
                                                 <>
-                                                    <Navigation className="w-5 h-5" />
-                                                    On the Way
+                                                    <Package className="w-5 h-5" />
+                                                    Pick Up Order
                                                 </>
                                             )}
                                         </button>
                                     )}
 
-                                    {activeDelivery.orderStatus === "on_the_way" && (
+                                    {(activeDelivery.orderStatus === "picked_up" || activeDelivery.orderStatus === "on_the_way") && (
                                         <button
                                             onClick={() => handleUpdateStatus(activeDelivery._id, "delivered")}
                                             disabled={actionLoading === activeDelivery._id}
@@ -300,7 +348,7 @@ const Dashboard = () => {
                                             ) : (
                                                 <>
                                                     <CheckCircle className="w-5 h-5" />
-                                                    Mark Delivered
+                                                    Complete Delivery
                                                 </>
                                             )}
                                         </button>
@@ -309,7 +357,6 @@ const Dashboard = () => {
                             </div>
                         )}
 
-                        {/* Available Orders */}
                         <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100">
                             <div className="flex items-center justify-between mb-6">
                                 <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
@@ -379,7 +426,6 @@ const Dashboard = () => {
                         </div>
                     </div>
 
-                    {/* Sidebar - Recent Activity */}
                     <div className="lg:col-span-1">
                         <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100 sticky top-24">
                             <h2 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2">

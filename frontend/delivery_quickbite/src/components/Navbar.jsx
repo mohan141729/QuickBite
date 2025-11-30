@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { User, LogOut, ChevronDown } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import ProfileCard from "./ProfileCard";
@@ -11,10 +11,12 @@ const Navbar = () => {
   const menuRef = useRef(null);
   const location = useLocation();
 
+  const navigate = useNavigate(); // Ensure useNavigate is imported from react-router-dom
+
   const handleLogout = async () => {
     try {
       await logout();
-      window.location.href = "/login";
+      navigate("/login");
     } catch (error) {
       console.error("Logout failed:", error);
     }

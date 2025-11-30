@@ -7,21 +7,50 @@ import {
   getDeliveryHistory,
   getAllDeliveryPartners,
   updateDeliveryPartnerStatus,
+
+  updateLocation,
+  acceptOrder,
+  updatePartnerProfile
 } from "../controllers/deliveryController.js";
-import protect from "../middleware/authMiddleware.js";
-import admin from "../middleware/adminMiddleware.js";
+import { clerkAuth, requireRole } from "../middleware/clerkAuth.js";
 
 const router = express.Router();
 
-// ✅ Correct route definitions
-router.get("/profile", protect, getPartnerProfile);
-router.get("/orders", protect, getAssignedOrders);
-router.get("/history", protect, getDeliveryHistory);
-router.put("/status/:orderId", protect, updateDeliveryStatus);
-router.put("/toggle/:partnerId", protect, toggleAvailability);
+// Delivery partner routes
+router.get("/debug-partners", getAllDeliveryPartners); // Reusing admin controller for debug, temporary
+router.get("/debug-orders/:partnerId", async (req, res) => {
+  try {
+    const { partnerId } = req.params;
+    const mongoose = await import("mongoose");
+    const DeliveryPartner = (await import("../models/DeliveryPartner.js")).default;
+    const Order = (await import("../models/Order.js")).default;
 
-// Admin
-router.get("/admin/all", protect, admin, getAllDeliveryPartners);
-router.put("/:id/status", protect, admin, updateDeliveryPartnerStatus);
+    const partner = await DeliveryPartner.findById(partnerId);
+    if (!partner) return res.status(404).json({ message: "Partner not found" });
+
+    const orders = await Order.find({
+      orderStatus: { $in: ["ready", "out-for-delivery"] },
+    })
+      .populate("restaurant", "name")
+      .populate("user", "name");
+
+    res.json({ partner, ordersCount: orders.length, orders });
+  } catch (error) {
+    res.status(500).json({ message: error.message, stack: error.stack });
+  }
+});
+
+router.get("/profile", clerkAuth, requireRole(['delivery_partner']), getPartnerProfile);
+router.put("/profile", clerkAuth, requireRole(['delivery_partner']), updatePartnerProfile); // ✅ New route
+router.get("/orders", clerkAuth, requireRole(['delivery_partner']), getAssignedOrders);
+router.get("/history", clerkAuth, requireRole(['delivery_partner']), getDeliveryHistory);
+router.put("/status/:orderId", clerkAuth, requireRole(['delivery_partner']), updateDeliveryStatus);
+router.put("/toggle/:partnerId", clerkAuth, requireRole(['delivery_partner']), toggleAvailability);
+router.put("/accept/:orderId", clerkAuth, requireRole(['delivery_partner']), acceptOrder); // ✅ New route
+router.put("/location", clerkAuth, requireRole(['delivery_partner']), updateLocation); // ✅ New route
+
+// Admin routes
+router.get("/admin/all", clerkAuth, requireRole(['admin']), getAllDeliveryPartners);
+router.put("/:id/status", clerkAuth, requireRole(['admin']), updateDeliveryPartnerStatus);
 
 export default router;

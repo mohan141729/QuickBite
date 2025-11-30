@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { X } from "lucide-react";
 import toast from "react-hot-toast";
 
 const EditRestaurantModal = ({ restaurant, onClose, onSave }) => {
@@ -57,6 +58,12 @@ const EditRestaurantModal = ({ restaurant, onClose, onSave }) => {
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-40 z-50">
       <div className="bg-white rounded-xl shadow-lg w-full max-w-lg p-6 relative">
+        <button
+          onClick={onClose}
+          className="absolute top-4 right-4 text-gray-500 hover:text-gray-800 transition"
+        >
+          <X size={20} />
+        </button>
         <h2 className="text-xl font-semibold text-gray-800 mb-4">Edit Restaurant</h2>
         <form onSubmit={handleSubmit} className="space-y-3">
           <input type="text" name="name" value={formData.name} onChange={handleChange} placeholder="Restaurant Name" className="w-full border p-2 rounded-md" required />

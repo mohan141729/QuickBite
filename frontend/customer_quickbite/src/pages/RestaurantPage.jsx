@@ -5,7 +5,7 @@ import { getMenuItemsByRestaurant } from "../api/menu"
 import MenuItemCard from "../components/MenuItemCard"
 import ReviewSection from "../components/ReviewSection"
 import { Star, MapPin, Clock, Search, Filter } from "lucide-react"
-import Navbor from "../components/Navbor"
+import Navbar from "../components/Navbar"
 
 const RestaurantPage = () => {
     const { id } = useParams()
@@ -45,7 +45,7 @@ const RestaurantPage = () => {
 
     return (
         <div className="min-h-screen bg-gray-50 pb-20">
-            <Navbor />
+            <Navbar />
 
             {/* Hero Section - Full Width */}
             <div className="relative w-full h-[350px] md:h-[400px]">

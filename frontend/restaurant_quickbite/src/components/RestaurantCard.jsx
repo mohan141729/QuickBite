@@ -1,5 +1,5 @@
 import React from "react";
-import { Pencil, Trash2, Star } from "lucide-react";
+import { Pencil, Trash2, Star, Clock, CheckCircle, XCircle } from "lucide-react";
 
 const RestaurantCard = ({ restaurant, onClick, onEdit, onDelete }) => {
   const locationText =
@@ -12,11 +12,43 @@ const RestaurantCard = ({ restaurant, onClick, onEdit, onDelete }) => {
       ? restaurant.cuisine.name || "Cuisine"
       : restaurant.cuisine || "Cuisine";
 
-  const rating = restaurant.rating || 0; // ✅ use rating
+  const rating = restaurant.rating || 0;
+  const status = restaurant.status || "pending";
+
+  // Status badge configuration
+  const statusConfig = {
+    pending: {
+      label: "Pending Approval",
+      icon: Clock,
+      bgColor: "bg-yellow-100",
+      textColor: "text-yellow-700",
+      borderColor: "border-yellow-300",
+    },
+    approved: {
+      label: "Approved",
+      icon: CheckCircle,
+      bgColor: "bg-green-100",
+      textColor: "text-green-700",
+      borderColor: "border-green-300",
+    },
+    rejected: {
+      label: "Rejected",
+      icon: XCircle,
+      bgColor: "bg-red-100",
+      textColor: "text-red-700",
+      borderColor: "border-red-300",
+    },
+  };
+
+  const currentStatus = statusConfig[status] || statusConfig.pending;
+  const StatusIcon = currentStatus.icon;
 
   return (
-    <div className="bg-white rounded-xl shadow-md hover:shadow-lg transition cursor-pointer overflow-hidden group relative">
-      <div onClick={onClick} className="relative">
+    <div
+      onClick={onClick}
+      className="bg-white rounded-xl shadow-md hover:shadow-lg transition cursor-pointer overflow-hidden group relative"
+    >
+      <div className="relative">
         <img
           src={
             restaurant.image ||
@@ -27,6 +59,14 @@ const RestaurantCard = ({ restaurant, onClick, onEdit, onDelete }) => {
         />
         <div className="absolute top-2 left-2 bg-[#FC8019] text-white text-xs font-semibold px-2 py-1 rounded-md">
           {cuisineText}
+        </div>
+
+        {/* Status Badge */}
+        <div
+          className={`absolute bottom-2 left-2 ${currentStatus.bgColor} ${currentStatus.textColor} ${currentStatus.borderColor} border text-xs font-semibold px-2 py-1 rounded-md flex items-center gap-1 shadow-sm`}
+        >
+          <StatusIcon size={12} />
+          {currentStatus.label}
         </div>
       </div>
 

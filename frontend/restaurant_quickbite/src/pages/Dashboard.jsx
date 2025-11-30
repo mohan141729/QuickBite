@@ -16,17 +16,15 @@ const Dashboard = () => {
   const [editRestaurant, setEditRestaurant] = useState(null);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+  const [refreshKey, setRefreshKey] = useState(0);
 
   // Fetch restaurants
   useEffect(() => {
     const loadRestaurants = async () => {
       try {
         const data = await getRestaurants();
-        const filtered =
-          user?.role === "restaurant_owner"
-            ? data.filter((r) => r.owner === user._id)
-            : data;
-        setRestaurants(filtered);
+        // Backend already filters by owner for restaurant_owner role
+        setRestaurants(data);
       } catch (err) {
         console.error("❌ Failed to load restaurants:", err);
         toast.error("Failed to load restaurants.");
@@ -35,7 +33,7 @@ const Dashboard = () => {
       }
     };
     loadRestaurants();
-  }, [user]);
+  }, [user, refreshKey]);
 
   const handleDelete = async (id) => {
     if (!window.confirm("Are you sure you want to delete this restaurant?")) return;
@@ -138,7 +136,10 @@ const Dashboard = () => {
       {showAddModal && (
         <AddRestaurantModal
           onClose={() => setShowAddModal(false)}
-          onAdded={(r) => setRestaurants((prev) => [...prev, r])}
+          onAdded={() => {
+            setRefreshKey(prev => prev + 1);
+            setShowAddModal(false);
+          }}
         />
       )}
 

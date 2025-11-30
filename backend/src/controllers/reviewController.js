@@ -1,4 +1,6 @@
 import Order from "../models/Order.js";
+import Restaurant from "../models/Restaurant.js";
+import Review from "../models/Review.js";
 
 // ✅ Add a new review
 export const addReview = async (req, res) => {
@@ -58,6 +60,18 @@ export const getReviewsByRestaurant = async (req, res) => {
     try {
         const reviews = await Review.find({ restaurant: req.params.restaurantId })
             .populate("user", "name")
+            .sort({ createdAt: -1 });
+
+        res.json(reviews);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+// ✅ Get reviews by user
+export const getUserReviews = async (req, res) => {
+    try {
+        const reviews = await Review.find({ user: req.user._id })
+            .populate("restaurant", "name image")
             .sort({ createdAt: -1 });
 
         res.json(reviews);

@@ -1,57 +1,117 @@
-import jwt from "jsonwebtoken"
-import bcrypt from "bcryptjs"
-import User from "../models/User.js"
+import jwt from 'jsonwebtoken';
+import { clerkClient } from '@clerk/clerk-sdk-node';
+import User from '../models/User.js';
 
-const generateToken = (res, userId) => {
-  const token = jwt.sign({ id: userId }, process.env.JWT_SECRET, { expiresIn: "7d" })
-  res.cookie("jwt", token, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "strict",
-    maxAge: 7 * 24 * 60 * 60 * 1000,
-  })
-  return token;
-}
+/**
+ * Generate JWT token based on Clerk user
+ * POST /api/auth/token
+ */
+export const generateToken = async (req, res) => {
+    try {
+        // Get user ID from the authenticated request (set by clerkAuth middleware)
+        const clerkId = req.auth.userId;
 
-// ✅ Register User
-export const registerUser = async (req, res) => {
-  try {
-    const { name, email, password, role } = req.body
-    const userExists = await User.findOne({ email })
-    if (userExists) return res.status(400).json({ message: "User already exists" })
+        if (!clerkId) {
+            return res.status(401).json({ message: 'Unauthorized: No user ID found' });
+        }
 
-    const user = await User.create({ name, email, password, role })
-    const token = generateToken(res, user._id)
-    res.status(201).json({ message: "User registered successfully", user, token })
-  } catch (error) {
-    res.status(500).json({ message: error.message })
-  }
-}
+        // Verify the Clerk ID exists
+        const clerkUser = await clerkClient.users.getUser(clerkId);
 
-// ✅ Login User
-export const loginUser = async (req, res) => {
-  try {
-    const { email, password } = req.body
-    const user = await User.findOne({ email })
-    if (!user) return res.status(400).json({ message: "Invalid email or password" })
+        if (!clerkUser) {
+            return res.status(404).json({ message: 'User not found' });
+        }
 
-    const isMatch = await bcrypt.compare(password, user.password)
-    if (!isMatch) return res.status(400).json({ message: "Invalid email or password" })
+        // Get user role from Clerk metadata
+        const role = clerkUser.publicMetadata?.role || 'customer';
 
-    const token = generateToken(res, user._id)
-    res.json({ message: "Login successful", user, token })
-  } catch (error) {
-    res.status(500).json({ message: error.message })
-  }
-}
+        // Create JWT payload
+        const payload = {
+            userId: clerkId,
+            email: clerkUser.primaryEmailAddress?.emailAddress,
+            role: role,
+            type: 'access_token'
+        };
 
-// ✅ Logout User
-export const logoutUser = (req, res) => {
-  res.cookie("jwt", "", {
-    httpOnly: true,
-    expires: new Date(0),
-    sameSite: "strict",
-    secure: process.env.NODE_ENV === "production", // Secure only in production
-  })
-  res.status(200).json({ message: "Logged out successfully" })
-}
+        // Sign JWT with secret
+        const token = jwt.sign(
+            payload,
+            process.env.JWT_SECRET || 'your-secret-key-change-in-production',
+            { expiresIn: '7d' } // Token expires in 7 days
+        );
+
+        res.json({
+            success: true,
+            token,
+            user: {
+                id: clerkId,
+                email: clerkUser.primaryEmailAddress?.emailAddress,
+                name: clerkUser.firstName + ' ' + clerkUser.lastName,
+                role: role
+            }
+        });
+    } catch (error) {
+        console.error('Error generating token:', error);
+        res.status(500).json({ message: 'Failed to generate token', error: error.message });
+    }
+};
+
+/**
+ * Sync Clerk user with MongoDB
+ * GET /api/auth/sync
+ */
+export const syncUser = async (req, res) => {
+    try {
+        const { userId } = req.auth;
+
+        // 1. Get clerk user details
+        const clerkUser = await clerkClient.users.getUser(userId);
+
+        // 2. Check if user already exists
+        let user = await User.findOne({ clerkId: userId });
+
+        // Get role from Clerk metadata, default to customer if not set
+        const role = clerkUser.publicMetadata?.role || 'customer';
+
+        if (!user) {
+            // Check if user exists by email to prevent duplicates if they signed up differently
+            const email = clerkUser.emailAddresses[0]?.emailAddress;
+            if (email) {
+                user = await User.findOne({ email });
+                if (user) {
+                    // Link existing user to Clerk ID
+                    user.clerkId = userId;
+                    user.role = role; // Sync role
+                    await user.save();
+                }
+            }
+
+            if (!user) {
+                user = await User.create({
+                    clerkId: userId,
+                    email: clerkUser.emailAddresses[0]?.emailAddress,
+                    name: (clerkUser.firstName + " " + clerkUser.lastName).trim() || "User",
+                    // avatar: clerkUser.imageUrl, // Add avatar if your schema supports it
+                    role: role // Use role from Clerk
+                });
+            }
+        } else {
+            // Update existing user details to match Clerk
+            user.name = (clerkUser.firstName + " " + clerkUser.lastName).trim() || user.name;
+            user.email = clerkUser.emailAddresses[0]?.emailAddress || user.email;
+
+            // CRITICAL: Always sync role from Clerk to DB
+            // This ensures if role changes in Clerk (e.g. via dashboard), it reflects in DB
+            if (role && user.role !== role) {
+                user.role = role;
+            }
+
+            await user.save();
+        }
+
+        res.json(user);
+    } catch (error) {
+        console.error('Error syncing user:', error);
+        res.status(500).json({ message: 'Failed to sync user', error: error.message });
+    }
+};

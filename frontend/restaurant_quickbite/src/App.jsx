@@ -1,7 +1,7 @@
 import { Routes, Route } from "react-router-dom";
 import LandingPage from "./pages/LandingPage";
-import LoginPage from "./pages/LoginPage";
-import RegisterPage from "./pages/RegisterPage";
+import SignIn from "./pages/SignIn";
+import SignUp from "./pages/SignUp";
 import Dashboard from "./pages/Dashboard";
 import RestaurantDashboard from "./pages/RestaurantDashboard";
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -10,8 +10,10 @@ const App = () => (
   <Routes>
     {/* Public Routes */}
     <Route path="/" element={<LandingPage />} />
-    <Route path="/login" element={<LoginPage />} />
-    <Route path="/register" element={<RegisterPage />} />
+
+    {/* Clerk Authentication Routes */}
+    <Route path="/sign-in" element={<SignIn />} />
+    <Route path="/sign-up" element={<SignUp />} />
 
     {/* Protected Routes */}
     <Route

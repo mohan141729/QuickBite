@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Search, ChevronLeft, ChevronRight } from 'lucide-react';
 
 const DataTable = ({
@@ -16,11 +16,13 @@ const DataTable = ({
 
     // Filter data based on search
     const filteredData = data.filter((row) =>
-        columns.some((col) =>
-            String(row[col.key])
+        columns.some((col) => {
+            if (col.key === 'actions') return false;
+            const value = row[col.key];
+            return value !== null && value !== undefined && String(value)
                 .toLowerCase()
-                .includes(searchTerm.toLowerCase())
-        )
+                .includes(searchTerm.toLowerCase());
+        })
     );
 
     // Pagination
@@ -32,27 +34,27 @@ const DataTable = ({
         return (
             <div className="space-y-4">
                 {[...Array(5)].map((_, i) => (
-                    <div key={i} className="skeleton h-16 rounded-lg" />
+                    <div key={i} className="skeleton h-16 rounded-xl" />
                 ))}
             </div>
         );
     }
 
     return (
-        <div>
+        <div className="animate-fade-in">
             {/* Search Bar */}
-            <div className="mb-6">
-                <div className="relative max-w-md">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+            <div className="mb-6 flex justify-between items-center">
+                <div className="relative max-w-md w-full">
+                    <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-slate-400" />
                     <input
                         type="text"
-                        placeholder="Search..."
+                        placeholder="Search records..."
                         value={searchTerm}
                         onChange={(e) => {
                             setSearchTerm(e.target.value);
                             setCurrentPage(1);
                         }}
-                        className="w-full pl-11 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                        className="w-full pl-12 pr-4 py-3 bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all shadow-sm hover:shadow-md"
                     />
                 </div>
             </div>
@@ -71,25 +73,32 @@ const DataTable = ({
                     <tbody>
                         {paginatedData.length === 0 ? (
                             <tr>
-                                <td colSpan={columns.length + (actions ? 1 : 0)} className="text-center py-8 text-gray-500">
-                                    No data found
+                                <td colSpan={columns.length + (actions ? 1 : 0)} className="text-center py-12 text-slate-500">
+                                    <div className="flex flex-col items-center gap-3">
+                                        <div className="w-12 h-12 bg-slate-100 rounded-full flex items-center justify-center">
+                                            <Search className="w-6 h-6 text-slate-400" />
+                                        </div>
+                                        <p className="font-medium">No records found</p>
+                                    </div>
                                 </td>
                             </tr>
                         ) : (
                             paginatedData.map((row, index) => (
-                                <tr key={row._id || index}>
+                                <tr key={row._id || index} className="group">
                                     {columns.map((col) => (
                                         <td key={col.key}>
-                                            {col.render ? col.render(row[col.key], row) : row[col.key]}
+                                            {col.render ? col.render(row[col.key], row) : (
+                                                <span className="font-medium text-slate-700">{row[col.key]}</span>
+                                            )}
                                         </td>
                                     ))}
                                     {actions && (
                                         <td>
-                                            <div className="flex items-center gap-2">
+                                            <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
                                                 {onView && (
                                                     <button
                                                         onClick={() => onView(row)}
-                                                        className="px-3 py-1 text-sm text-indigo-600 hover:bg-indigo-50 rounded transition-colors"
+                                                        className="px-3 py-1.5 text-xs font-semibold text-indigo-600 bg-indigo-50 hover:bg-indigo-100 rounded-lg transition-colors"
                                                     >
                                                         View
                                                     </button>
@@ -97,7 +106,7 @@ const DataTable = ({
                                                 {onEdit && (
                                                     <button
                                                         onClick={() => onEdit(row)}
-                                                        className="px-3 py-1 text-sm text-blue-600 hover:bg-blue-50 rounded transition-colors"
+                                                        className="px-3 py-1.5 text-xs font-semibold text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors"
                                                     >
                                                         Edit
                                                     </button>
@@ -105,7 +114,7 @@ const DataTable = ({
                                                 {onDelete && (
                                                     <button
                                                         onClick={() => onDelete(row)}
-                                                        className="px-3 py-1 text-sm text-red-600 hover:bg-red-50 rounded transition-colors"
+                                                        className="px-3 py-1.5 text-xs font-semibold text-red-600 bg-red-50 hover:bg-red-100 rounded-lg transition-colors"
                                                     >
                                                         Delete
                                                     </button>
@@ -122,27 +131,27 @@ const DataTable = ({
 
             {/* Pagination */}
             {filteredData.length > itemsPerPage && (
-                <div className="flex items-center justify-between mt-6">
-                    <p className="text-sm text-gray-600">
-                        Showing {startIndex + 1} to {Math.min(startIndex + itemsPerPage, filteredData.length)} of {filteredData.length} results
+                <div className="flex items-center justify-between mt-6 px-2">
+                    <p className="text-sm text-slate-500 font-medium">
+                        Showing <span className="text-slate-800 font-bold">{startIndex + 1}</span> to <span className="text-slate-800 font-bold">{Math.min(startIndex + itemsPerPage, filteredData.length)}</span> of <span className="text-slate-800 font-bold">{filteredData.length}</span> results
                     </p>
                     <div className="flex items-center gap-2">
                         <button
                             onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
                             disabled={currentPage === 1}
-                            className="p-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="p-2.5 border border-slate-200 rounded-xl hover:bg-white hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed transition-all bg-slate-50"
                         >
-                            <ChevronLeft className="w-5 h-5" />
+                            <ChevronLeft className="w-5 h-5 text-slate-600" />
                         </button>
-                        <span className="px-4 py-2 text-sm font-medium">
+                        <span className="px-4 py-2 text-sm font-bold text-slate-700 bg-white border border-slate-200 rounded-xl shadow-sm">
                             Page {currentPage} of {totalPages}
                         </span>
                         <button
                             onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
                             disabled={currentPage === totalPages}
-                            className="p-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="p-2.5 border border-slate-200 rounded-xl hover:bg-white hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed transition-all bg-slate-50"
                         >
-                            <ChevronRight className="w-5 h-5" />
+                            <ChevronRight className="w-5 h-5 text-slate-600" />
                         </button>
                     </div>
                 </div>

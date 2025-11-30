@@ -17,7 +17,8 @@ import {
   Search,
   Calendar,
   Wifi,
-  WifiOff
+  WifiOff,
+  Bike
 } from "lucide-react";
 
 const OrdersTab = ({ restaurantId }) => {
@@ -81,9 +82,23 @@ const OrdersTab = ({ restaurantId }) => {
 
     socket.on('order-status-updated', handleOrderStatusUpdate);
 
+    // ✅ Listen for new orders
+    socket.on('new-order', (newOrder) => {
+      console.log('🔔 New order received:', newOrder);
+      setOrders(prev => [newOrder, ...prev]);
+
+      if (Notification.permission === 'granted') {
+        new Notification('New Order Received', {
+          body: `Order #${newOrder._id.slice(-6).toUpperCase()} received`,
+          icon: '/logo.png',
+        });
+      }
+    });
+
     // Cleanup listener on unmount
     return () => {
       socket.off('order-status-updated', handleOrderStatusUpdate);
+      socket.off('new-order');
     };
   }, [socket]);
 
@@ -125,7 +140,7 @@ const OrdersTab = ({ restaurantId }) => {
 
     const matchesSearch = !searchTerm ||
       order._id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      order.user?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (order.customerName || order.user?.name || order.customer?.name || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
       order.items?.some(item =>
         item.menuItem?.name?.toLowerCase().includes(searchTerm.toLowerCase())
       );
@@ -316,7 +331,7 @@ const OrdersTab = ({ restaurantId }) => {
           filteredOrders.map(order => {
             const status = order.orderStatus || "processing";
             const total = order.totalAmount || 0;
-            const customer = order.user?.name || "Customer";
+            const customer = order.customerName || order.user?.name || order.customer?.name || "Guest User";
             const isExpanded = expandedOrders.has(order._id);
 
             return (
@@ -434,31 +449,17 @@ const OrdersTab = ({ restaurantId }) => {
                     )}
 
                     {status === "ready" && (
-                      <button
-                        onClick={() => handleStatusChange(order._id, "out_for_delivery")}
-                        disabled={updating === order._id}
-                        className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2.5 rounded-lg font-semibold disabled:opacity-50 transition flex items-center justify-center gap-2"
-                      >
-                        {updating === order._id ? (
-                          <><Loader2 className="w-4 h-4 animate-spin" /> Updating...</>
-                        ) : (
-                          <><Package className="w-4 h-4" /> Out for Delivery</>
-                        )}
-                      </button>
+                      <div className="flex-1 flex items-center justify-center gap-2 text-purple-700 font-semibold bg-purple-50 px-4 py-2.5 rounded-lg border border-purple-200">
+                        <Package className="w-5 h-5" />
+                        Waiting for Pickup
+                      </div>
                     )}
 
-                    {status === "out_for_delivery" && (
-                      <button
-                        onClick={() => handleStatusChange(order._id, "delivered")}
-                        disabled={updating === order._id}
-                        className="flex-1 bg-green-600 hover:bg-green-700 text-white px-4 py-2.5 rounded-lg font-semibold disabled:opacity-50 transition flex items-center justify-center gap-2"
-                      >
-                        {updating === order._id ? (
-                          <><Loader2 className="w-4 h-4 animate-spin" /> Updating...</>
-                        ) : (
-                          <><CheckCircle className="w-4 h-4" /> Mark as Delivered</>
-                        )}
-                      </button>
+                    {(status === "picked_up" || status === "out-for-delivery") && (
+                      <div className="flex-1 flex items-center justify-center gap-2 text-indigo-700 font-semibold bg-indigo-50 px-4 py-2.5 rounded-lg border border-indigo-200">
+                        <Bike className="w-5 h-5" />
+                        Picked Up - On the Way
+                      </div>
                     )}
 
                     {status === "delivered" && (

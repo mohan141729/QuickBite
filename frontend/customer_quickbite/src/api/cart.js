@@ -9,10 +9,10 @@ export const fetchCart = async () => {
 }
 
 // ➕ Add item
-export const addToCartAPI = async (menuItemId, quantity = 1) => {
+export const addToCartAPI = async (menuItemId, quantity = 1, restaurantId, selectedVariant = null, selectedAddOns = []) => {
   const { data } = await api.post(
     API_URL,
-    { menuItemId, quantity },
+    { menuItemId, quantity, restaurantId, selectedVariant, selectedAddOns },
     { withCredentials: true }
   )
   return data.cart

@@ -1,13 +1,13 @@
 import api from './axios';
 
 // Get all orders (Admin)
-export const getAllOrders = () => api.get('/api/orders');
+export const getAllOrders = (params) => api.get('/orders', { params });
 
 // Get order by ID
-export const getOrderById = (id) => api.get(`/api/orders/${id}`);
+export const getOrderById = (id) => api.get(`/orders/${id}`);
 
 // Get order statistics
-export const getOrderStats = (params) => api.get('/api/orders/stats', { params });
+export const getOrderStats = (params) => api.get('/orders/stats', { params });
 
 // Export orders
-export const exportOrders = (params) => api.get('/api/orders/export', { params, responseType: 'blob' });
+export const exportOrders = (params) => api.get('/orders/export', { params, responseType: 'blob' });

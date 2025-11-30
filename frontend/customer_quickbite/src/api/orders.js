@@ -20,6 +20,12 @@ export const getMyOrders = async (token) => {
   }
 };
 
+// ✅ Cancel order (customer)
+export const cancelOrder = async (orderId, cancellationReason) => {
+  const { data } = await api.put(`/api/orders/${orderId}/cancel`, { cancellationReason });
+  return data;
+};
+
 // ✅ Get all orders (for admin or restaurant owners)
 export const getAllOrders = async () => {
   const { data } = await api.get(API_URL, { withCredentials: true })

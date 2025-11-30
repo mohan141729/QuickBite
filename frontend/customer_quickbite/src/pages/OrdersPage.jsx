@@ -1,9 +1,11 @@
-import React, { useEffect, useState } from "react"
-import { getMyOrders } from "../api/orders"
-import Navbor from "../components/Navbor"
-import { Loader2, PackageCheck, MapPin, Wifi, WifiOff } from "lucide-react"
+import React, { useEffect, useState, useRef } from "react"
+import { getMyOrders, cancelOrder } from "../api/orders"
+import Navbar from "../components/Navbar"
+import { Loader2, PackageCheck, MapPin, Wifi, WifiOff, XCircle, Star } from "lucide-react"
 import TrackOrderDrawer from "../components/TrackOrderDrawer"
 import FeedbackModal from "../components/FeedbackModal"
+import ReviewFormModal from "../components/ReviewFormModal"
+import CancelOrderModal from "../components/CancelOrderModal"
 import { useSocket } from "../context/SocketContext"
 
 const OrdersPage = () => {
@@ -11,7 +13,22 @@ const OrdersPage = () => {
   const [loading, setLoading] = useState(true)
   const [selectedOrder, setSelectedOrder] = useState(null)
   const [feedbackOrder, setFeedbackOrder] = useState(null)
+  const [reviewOrder, setReviewOrder] = useState(null)
+  const [cancellingOrder, setCancellingOrder] = useState(null)
   const { socket, isConnected } = useSocket()
+  const selectedOrderIdRef = useRef(null)
+
+  // Keep track of the selected order ID so we can verify Socket.IO updates
+  useEffect(() => {
+    selectedOrderIdRef.current = selectedOrder?._id
+  }, [selectedOrder])
+
+  // Request notification permission on mount
+  useEffect(() => {
+    if ("Notification" in window && Notification.permission === "default") {
+      Notification.requestPermission()
+    }
+  }, [])
 
   useEffect(() => {
     const fetchOrders = async () => {
@@ -35,58 +52,53 @@ const OrdersPage = () => {
     fetchOrders()
   }, [])
 
-  // ✅ Listen for real-time order status updates via WebSocket
+  // Listen for real-time status updates via WebSocket
   useEffect(() => {
-    if (!socket) return;
+    if (!socket) return
 
     const handleOrderStatusUpdate = (data) => {
-      console.log('📡 Received order status update:', data);
+      console.log('📡 Received order status update:', data)
 
-      // Update the orders list with the new status
-      setOrders((prevOrders) =>
-        prevOrders.map((order) =>
-          order._id === data.orderId
-            ? { ...order, orderStatus: data.orderStatus, ...data.order }
-            : order
-        )
-      );
+      // Update the order in the list
+      setOrders((prev) =>
+        prev.map((o) => (o._id === data.orderId ? { ...o, orderStatus: data.orderStatus } : o))
+      )
 
-      // Also update selected order if it's the one being tracked
-      if (selectedOrder && selectedOrder._id === data.orderId) {
-        setSelectedOrder((prev) => ({
-          ...prev,
-          orderStatus: data.orderStatus,
-          ...data.order,
-        }));
+      // Update selected order if it's the one being tracked
+      if (data.orderId === selectedOrderIdRef.current) {
+        setSelectedOrder((prev) => ({ ...prev, orderStatus: data.orderStatus }))
       }
 
-      // Show notification (optional)
+      // Show notification
       if (Notification.permission === 'granted') {
         new Notification('Order Status Updated', {
-          body: `Your order is now ${data.orderStatus}`,
+          body: `Your order is now ${data.orderStatus.replace("_", " ")}`,
           icon: '/logo.png',
-        });
+        })
       }
-    };
 
-    socket.on('order-status-updated', handleOrderStatusUpdate);
+      // If order is delivered, show feedback modal
+      if (data.orderStatus === 'delivered') {
+        const deliveredOrder = orders.find(o => o._id === data.orderId)
+        if (deliveredOrder && !deliveredOrder.isReviewed) {
+          setFeedbackOrder(deliveredOrder)
+        }
+      }
+    }
 
-    // Cleanup listener on unmount
+    socket.on('order-status-updated', handleOrderStatusUpdate)
+
     return () => {
-      socket.off('order-status-updated', handleOrderStatusUpdate);
-    };
-  }, [socket, selectedOrder]);
+      socket.off('order-status-updated', handleOrderStatusUpdate)
+    }
+  }, [socket, orders])
 
   const handleFeedbackSuccess = () => {
-    // Update local state to mark order as reviewed so popup doesn't reappear immediately
-    if (feedbackOrder) {
-      setOrders((prev) =>
-        prev.map((o) =>
-          o._id === feedbackOrder._id ? { ...o, isReviewed: true } : o
-        )
-      )
-      setFeedbackOrder(null)
-    }
+    // Update local state to mark order as reviewed
+    setOrders(prev => prev.map(o =>
+      o._id === feedbackOrder?._id ? { ...o, isReviewed: true } : o
+    ))
+    setFeedbackOrder(null)
   }
 
   if (loading)
@@ -100,7 +112,7 @@ const OrdersPage = () => {
   if (!orders.length)
     return (
       <div className="min-h-screen bg-quickbite-bg">
-        <Navbor />
+        <Navbar />
         <div className="pt-24 flex flex-col items-center justify-center text-gray-500">
           <PackageCheck className="w-16 h-16 mb-3 text-gray-400" />
           <p className="text-lg font-medium">No orders placed yet</p>
@@ -110,7 +122,7 @@ const OrdersPage = () => {
 
   return (
     <div className="min-h-screen bg-quickbite-bg">
-      <Navbor />
+      <Navbar />
       <div className="max-w-5xl mx-auto px-4 pt-24 pb-10">
         <div className="flex items-center justify-between mb-6">
           <h1 className="text-2xl font-bold text-gray-900">My Orders</h1>
@@ -163,7 +175,7 @@ const OrdersPage = () => {
                           : "bg-orange-100 text-orange-600"
                         }`}
                     >
-                      {order.orderStatus || "Processing"}
+                      {order.orderStatus?.replace("_", " ") || "Processing"}
                     </span>
                     {order.isReviewed && (
                       <span className="text-xs text-green-600 font-medium">Reviewed ✓</span>
@@ -194,6 +206,36 @@ const OrdersPage = () => {
                     Total: ₹{order.totalAmount || 0}
                   </p>
                 </div>
+
+                {/* Action Buttons */}
+                <div className="flex gap-2 mt-4">
+                  <button
+                    onClick={(e) => { e.stopPropagation(); setSelectedOrder(order); }}
+                    className="flex-1 px-4 py-2 bg-orange-500 text-white text-sm rounded-lg hover:bg-orange-600 transition"
+                  >
+                    Track Order
+                  </button>
+
+                  {/* Cancel Button - only for processing/accepted */}
+                  {['processing', 'accepted'].includes(order.orderStatus) && (
+                    <button
+                      onClick={(e) => { e.stopPropagation(); setCancellingOrder(order); }}
+                      className="px-4 py-2 bg-red-500 text-white text-sm rounded-lg hover:bg-red-600 transition flex items-center gap-1"
+                    >
+                      <XCircle className="w-4 h-4" /> Cancel
+                    </button>
+                  )}
+
+                  {/* Review Button - only for delivered and not reviewed */}
+                  {order.orderStatus === 'delivered' && !order.isReviewed && (
+                    <button
+                      onClick={(e) => { e.stopPropagation(); setReviewOrder(order); }}
+                      className="px-4 py-2 bg-green-500 text-white text-sm rounded-lg hover:bg-green-600 transition flex items-center gap-1"
+                    >
+                      <Star className="w-4 h-4" /> Review
+                    </button>
+                  )}
+                </div>
               </div>
             )
           })}
@@ -214,6 +256,43 @@ const OrdersPage = () => {
           order={feedbackOrder}
           onClose={() => setFeedbackOrder(null)}
           onSuccess={handleFeedbackSuccess}
+        />
+      )}
+
+      {/* ⭐ Review Form Modal */}
+      {reviewOrder && (
+        <ReviewFormModal
+          order={reviewOrder}
+          onClose={() => setReviewOrder(null)}
+          onSuccess={() => {
+            // Update order to mark as reviewed
+            setOrders(prev => prev.map(o =>
+              o._id === reviewOrder._id ? { ...o, isReviewed: true } : o
+            ));
+            setReviewOrder(null);
+          }}
+        />
+      )}
+
+      {/* ❌ Cancel Order Modal */}
+      {cancellingOrder && (
+        <CancelOrderModal
+          order={cancellingOrder}
+          onClose={() => setCancellingOrder(null)}
+          onConfirm={async (reason) => {
+            try {
+              await cancelOrder(cancellingOrder._id, reason);
+              setOrders(prev => prev.map(o =>
+                o._id === cancellingOrder._id
+                  ? { ...o, orderStatus: 'cancelled', isCancelled: true }
+                  : o
+              ));
+              setCancellingOrder(null);
+              alert('Order cancelled successfully');
+            } catch (error) {
+              alert(error.response?.data?.message || 'Failed to cancel order');
+            }
+          }}
         />
       )}
     </div>

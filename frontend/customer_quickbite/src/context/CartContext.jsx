@@ -15,7 +15,6 @@ export const CartProvider = ({ children }) => {
   const [total, setTotal] = useState(0)
   const [loading, setLoading] = useState(false)
 
-  // 🔹 Normalize cart item to always include restaurant info
   const normalizeItems = (items = []) =>
     items.map((i) => ({
       _id: i.menuItem?._id || i._id,
@@ -23,6 +22,8 @@ export const CartProvider = ({ children }) => {
       price: i.menuItem?.price || i.price,
       image: i.menuItem?.image,
       quantity: i.quantity,
+      selectedVariant: i.selectedVariant || null,
+      selectedAddOns: i.selectedAddOns || [],
       restaurant:
         i.restaurant ||
         i.menuItem?.restaurant || // from populated data
@@ -51,7 +52,19 @@ export const CartProvider = ({ children }) => {
   // ➕ Add item
   const addToCart = async (menuItem, quantity = 1) => {
     try {
-      const updatedCart = await addToCartAPI(menuItem._id, quantity)
+      // Extract customizations if present
+      const selectedVariant = menuItem.selectedVariant || null;
+      const selectedAddOns = menuItem.selectedAddOns || [];
+
+      // Extract restaurant ID (handle both populated object and ID string)
+      const restaurantId = menuItem.restaurant?._id || menuItem.restaurant;
+
+      if (!restaurantId) {
+        console.error("Missing restaurant ID for item:", menuItem);
+        return;
+      }
+
+      const updatedCart = await addToCartAPI(menuItem._id, quantity, restaurantId, selectedVariant, selectedAddOns)
       const items = updatedCart?.cart?.items || updatedCart?.items || []
       setCartItems(normalizeItems(items))
       setTotal(updatedCart?.cart?.totalPrice || updatedCart?.totalPrice || 0)

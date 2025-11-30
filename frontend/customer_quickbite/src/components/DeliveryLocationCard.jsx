@@ -4,7 +4,7 @@ import { useAuth } from "../context/AuthContext"
 
 const DeliveryLocationCard = ({ onClose }) => {
   const { user, updateProfile } = useAuth()
-  const [selectedIndex, setSelectedIndex] = useState(0)
+
   const [addingNew, setAddingNew] = useState(false)
   const [saving, setSaving] = useState(false)
   const [deletingIndex, setDeletingIndex] = useState(null)
@@ -19,7 +19,7 @@ const DeliveryLocationCard = ({ onClose }) => {
   const handleSelectAddress = async (index) => {
     try {
       setSaving(true)
-      setSelectedIndex(index)
+
 
       const selected = user.address[index]
       const updatedAddresses = [
@@ -89,8 +89,8 @@ const DeliveryLocationCard = ({ onClose }) => {
                 <div
                   key={i}
                   className={`p-3 border rounded-lg transition relative group ${i === 0
-                      ? "border-quickbite-orange bg-quickbite-orange/5"
-                      : "border-gray-200 hover:border-quickbite-orange/60"
+                    ? "border-quickbite-orange bg-quickbite-orange/5"
+                    : "border-gray-200 hover:border-quickbite-orange/60"
                     }`}
                 >
                   <div

@@ -34,4 +34,4 @@ const reviewSchema = new mongoose.Schema(
 // Prevent user from reviewing the same order multiple times
 reviewSchema.index({ order: 1, user: 1 }, { unique: true, partialFilterExpression: { order: { $exists: true } } });
 
-export default mongoose.model("Review", reviewSchema);
+export default mongoose.models.Review || mongoose.model("Review", reviewSchema);

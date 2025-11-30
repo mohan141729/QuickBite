@@ -12,16 +12,16 @@ export const initiatePayment = async (req, res) => {
     const payment = await Payment.create({
       order: order._id,
       user: req.user._id,
-      amount: order.totalPrice,
+      amount: order.totalAmount,
       method,
-      status: method === "COD" ? "success" : "initiated",
+      status: method === "COD" ? "pending" : "initiated",
       transactionId: method === "COD" ? `COD-${Date.now()}` : undefined,
     })
 
-    // Auto-confirm COD payments
+    // Auto-confirm COD payments (Order placed, payment pending)
     if (method === "COD") {
-      order.paymentStatus = "paid"
-      order.status = "confirmed"
+      order.paymentStatus = "pending"
+      order.orderStatus = "processing"
       await order.save()
     }
 
@@ -51,7 +51,7 @@ export const verifyPayment = async (req, res) => {
       await payment.save()
 
       payment.order.paymentStatus = "paid"
-      payment.order.status = "confirmed"
+      // payment.order.orderStatus = "processing" // Keep as processing until restaurant accepts
       await payment.order.save()
       return res.json({ message: "Payment verified successfully", payment })
     } else {

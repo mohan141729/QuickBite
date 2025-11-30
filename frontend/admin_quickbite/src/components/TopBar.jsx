@@ -1,10 +1,11 @@
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Bell, Search, User, ChevronDown, Settings, LogOut, X } from 'lucide-react';
-import { useAuth } from '../context/AuthContext';
+import { useUser, useClerk } from '@clerk/clerk-react';
 import { useNavigate } from 'react-router-dom';
 
 const TopBar = ({ title }) => {
-    const { user, logout } = useAuth();
+    const { user } = useUser();
+    const { signOut } = useClerk();
     const navigate = useNavigate();
     const [showDropdown, setShowDropdown] = useState(false);
     const [showNotifications, setShowNotifications] = useState(false);
@@ -84,22 +85,25 @@ const TopBar = ({ title }) => {
     const unreadCount = notifications.filter(n => !n.read).length;
 
     return (
-        <div className="fixed top-0 left-64 right-0 h-16 bg-white border-b border-gray-200 flex items-center justify-between px-8 z-40 shadow-sm">
+        <div className="fixed top-0 left-64 right-0 h-20 glass z-40 flex items-center justify-between px-8 transition-all duration-300">
             {/* Page Title */}
-            <h1 className="text-2xl font-bold text-gray-900">{title}</h1>
+            <div>
+                <h1 className="text-2xl font-bold text-slate-800 tracking-tight">{title}</h1>
+                <p className="text-xs text-slate-500 mt-0.5">Overview & Statistics</p>
+            </div>
 
             {/* Right Section */}
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-6">
                 {/* Search */}
                 <div className="relative hidden md:block" ref={searchRef}>
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400" />
                     <input
                         type="text"
                         placeholder="Search pages..."
                         value={searchQuery}
                         onChange={(e) => handleSearch(e.target.value)}
                         onFocus={() => searchQuery && setShowSearchResults(true)}
-                        className="pl-10 pr-10 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent w-64"
+                        className="pl-10 pr-10 py-2.5 bg-white/50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 w-72 transition-all duration-200 shadow-sm hover:shadow-md"
                     />
                     {searchQuery && (
                         <button
@@ -107,7 +111,7 @@ const TopBar = ({ title }) => {
                                 setSearchQuery('');
                                 setShowSearchResults(false);
                             }}
-                            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-slate-600"
                         >
                             <X className="w-4 h-4" />
                         </button>
@@ -115,17 +119,19 @@ const TopBar = ({ title }) => {
 
                     {/* Search Results Dropdown */}
                     {showSearchResults && searchResults.length > 0 && (
-                        <div className="absolute top-full mt-2 w-full bg-white rounded-lg shadow-lg border border-gray-100 py-2 z-50 max-h-64 overflow-y-auto">
+                        <div className="absolute top-full mt-3 w-full bg-white rounded-xl shadow-xl border border-slate-100 py-2 z-50 max-h-64 overflow-y-auto animate-fade-in">
                             {searchResults.map((result) => (
                                 <button
                                     key={result.path}
                                     onClick={() => handleSearchResultClick(result.path)}
-                                    className="w-full text-left px-4 py-2 hover:bg-gray-50 flex items-center gap-3"
+                                    className="w-full text-left px-4 py-3 hover:bg-indigo-50 flex items-center gap-3 transition-colors"
                                 >
-                                    <Search className="w-4 h-4 text-gray-400" />
+                                    <div className="p-2 bg-indigo-100 rounded-lg text-indigo-600">
+                                        <Search className="w-4 h-4" />
+                                    </div>
                                     <div>
-                                        <p className="text-sm font-medium text-gray-900">{result.name}</p>
-                                        <p className="text-xs text-gray-500">{result.type}</p>
+                                        <p className="text-sm font-semibold text-slate-800">{result.name}</p>
+                                        <p className="text-xs text-slate-500 capitalize">{result.type}</p>
                                     </div>
                                 </button>
                             ))}
@@ -133,8 +139,8 @@ const TopBar = ({ title }) => {
                     )}
 
                     {showSearchResults && searchResults.length === 0 && searchQuery && (
-                        <div className="absolute top-full mt-2 w-full bg-white rounded-lg shadow-lg border border-gray-100 py-4 z-50">
-                            <p className="text-sm text-gray-500 text-center">No results found</p>
+                        <div className="absolute top-full mt-3 w-full bg-white rounded-xl shadow-xl border border-slate-100 py-6 z-50 text-center animate-fade-in">
+                            <p className="text-sm text-slate-500">No results found</p>
                         </div>
                     )}
                 </div>
@@ -143,50 +149,55 @@ const TopBar = ({ title }) => {
                 <div className="relative" ref={notificationRef}>
                     <button
                         onClick={() => setShowNotifications(!showNotifications)}
-                        className="relative p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                        className="relative p-2.5 hover:bg-white/80 rounded-xl transition-all duration-200 border border-transparent hover:border-slate-200 hover:shadow-sm group"
                     >
-                        <Bell className="w-5 h-5 text-gray-600" />
+                        <Bell className="w-5 h-5 text-slate-600 group-hover:text-indigo-600 transition-colors" />
                         {unreadCount > 0 && (
-                            <span className="absolute top-1 right-1 w-5 h-5 bg-red-500 rounded-full text-white text-xs flex items-center justify-center font-semibold">
-                                {unreadCount}
-                            </span>
+                            <span className="absolute top-2 right-2 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white"></span>
                         )}
                     </button>
 
                     {/* Notifications Dropdown */}
                     {showNotifications && (
-                        <div className="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-lg border border-gray-100 z-50">
-                            <div className="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
-                                <h3 className="font-semibold text-gray-900">Notifications</h3>
+                        <div className="absolute right-0 mt-3 w-80 bg-white rounded-2xl shadow-2xl border border-slate-100 z-50 overflow-hidden animate-slide-up">
+                            <div className="px-5 py-4 border-b border-slate-50 bg-slate-50/50 flex items-center justify-between">
+                                <h3 className="font-bold text-slate-800">Notifications</h3>
                                 {unreadCount > 0 && (
-                                    <span className="text-xs bg-red-100 text-red-600 px-2 py-1 rounded-full font-semibold">
-                                        {unreadCount} new
+                                    <span className="text-xs bg-indigo-100 text-indigo-600 px-2.5 py-1 rounded-full font-bold">
+                                        {unreadCount} New
                                     </span>
                                 )}
                             </div>
-                            <div className="max-h-96 overflow-y-auto">
+                            <div className="max-h-[24rem] overflow-y-auto">
                                 {notifications.length > 0 ? (
                                     notifications.map((notification) => (
                                         <div
                                             key={notification.id}
-                                            className={`px-4 py-3 border-b border-gray-50 hover:bg-gray-50 cursor-pointer ${!notification.read ? 'bg-indigo-50' : ''
+                                            className={`px-5 py-4 border-b border-slate-50 hover:bg-slate-50 cursor-pointer transition-colors ${!notification.read ? 'bg-indigo-50/30' : ''
                                                 }`}
                                         >
-                                            <p className="text-sm text-gray-900 font-medium">{notification.message}</p>
-                                            <p className="text-xs text-gray-500 mt-1">{notification.time}</p>
+                                            <div className="flex gap-3">
+                                                <div className={`mt-1 w-2 h-2 rounded-full flex-shrink-0 ${!notification.read ? 'bg-indigo-500' : 'bg-slate-300'}`} />
+                                                <div>
+                                                    <p className={`text-sm ${!notification.read ? 'font-semibold text-slate-800' : 'text-slate-600'}`}>
+                                                        {notification.message}
+                                                    </p>
+                                                    <p className="text-xs text-slate-400 mt-1.5 font-medium">{notification.time}</p>
+                                                </div>
+                                            </div>
                                         </div>
                                     ))
                                 ) : (
-                                    <div className="px-4 py-8 text-center">
-                                        <Bell className="w-12 h-12 text-gray-300 mx-auto mb-2" />
-                                        <p className="text-sm text-gray-500">No notifications</p>
+                                    <div className="px-5 py-12 text-center">
+                                        <Bell className="w-12 h-12 text-slate-200 mx-auto mb-3" />
+                                        <p className="text-sm text-slate-500 font-medium">No notifications yet</p>
                                     </div>
                                 )}
                             </div>
                             {notifications.length > 0 && (
-                                <div className="px-4 py-3 border-t border-gray-100">
-                                    <button className="text-sm text-indigo-600 hover:text-indigo-700 font-medium w-full text-center">
-                                        View all notifications
+                                <div className="p-2 bg-slate-50 border-t border-slate-100">
+                                    <button className="text-sm text-indigo-600 hover:text-indigo-700 font-semibold w-full py-2 rounded-lg hover:bg-indigo-50 transition-colors">
+                                        Mark all as read
                                     </button>
                                 </div>
                             )}
@@ -198,47 +209,51 @@ const TopBar = ({ title }) => {
                 <div className="relative" ref={dropdownRef}>
                     <button
                         onClick={() => setShowDropdown(!showDropdown)}
-                        className="flex items-center gap-3 pl-4 border-l border-gray-200 hover:bg-gray-50 p-2 rounded-lg transition-colors"
+                        className="flex items-center gap-3 pl-4 border-l border-slate-200 hover:bg-white/50 p-2 rounded-xl transition-all duration-200 group"
                     >
-                        <div className="w-9 h-9 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-full flex items-center justify-center">
+                        <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-violet-600 rounded-full flex items-center justify-center shadow-md group-hover:shadow-indigo-500/20 transition-all">
                             <User className="w-5 h-5 text-white" />
                         </div>
                         <div className="hidden lg:block text-left">
-                            <p className="font-semibold text-sm text-gray-900">{user?.name || 'Admin'}</p>
-                            <p className="text-xs text-gray-500">Administrator</p>
+                            <p className="font-bold text-sm text-slate-800 group-hover:text-indigo-600 transition-colors">{user?.fullName || user?.primaryEmailAddress?.emailAddress || 'Admin'}</p>
+                            <p className="text-xs text-slate-500 font-medium">Administrator</p>
                         </div>
-                        <ChevronDown className={`w-4 h-4 text-gray-400 hidden lg:block transition-transform ${showDropdown ? 'rotate-180' : ''}`} />
+                        <ChevronDown className={`w-4 h-4 text-slate-400 hidden lg:block transition-transform duration-200 ${showDropdown ? 'rotate-180' : ''}`} />
                     </button>
 
                     {/* Dropdown Menu */}
                     {showDropdown && (
-                        <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg border border-gray-100 py-1 z-50">
-                            <div className="px-4 py-3 border-b border-gray-100 lg:hidden">
-                                <p className="font-semibold text-sm text-gray-900">{user?.name || 'Admin'}</p>
-                                <p className="text-xs text-gray-500">{user?.email || 'admin@quickbite.com'}</p>
+                        <div className="absolute right-0 mt-3 w-60 bg-white rounded-2xl shadow-2xl border border-slate-100 py-2 z-50 animate-slide-up">
+                            <div className="px-5 py-4 border-b border-slate-50 lg:hidden">
+                                <p className="font-bold text-sm text-slate-800">{user?.name || 'Admin'}</p>
+                                <p className="text-xs text-slate-500">{user?.email || 'admin@quickbite.com'}</p>
                             </div>
-                            <button
-                                onClick={handleViewProfile}
-                                className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-3"
-                            >
-                                <User className="w-4 h-4" />
-                                View Profile
-                            </button>
-                            <button
-                                onClick={handleViewProfile}
-                                className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-3"
-                            >
-                                <Settings className="w-4 h-4" />
-                                Settings
-                            </button>
-                            <div className="border-t border-gray-100 my-1"></div>
-                            <button
-                                onClick={logout}
-                                className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center gap-3"
-                            >
-                                <LogOut className="w-4 h-4" />
-                                Logout
-                            </button>
+                            <div className="p-2">
+                                <button
+                                    onClick={handleViewProfile}
+                                    className="w-full text-left px-4 py-2.5 text-sm text-slate-700 hover:bg-indigo-50 hover:text-indigo-700 rounded-xl flex items-center gap-3 transition-colors font-medium"
+                                >
+                                    <User className="w-4 h-4" />
+                                    View Profile
+                                </button>
+                                <button
+                                    onClick={handleViewProfile}
+                                    className="w-full text-left px-4 py-2.5 text-sm text-slate-700 hover:bg-indigo-50 hover:text-indigo-700 rounded-xl flex items-center gap-3 transition-colors font-medium"
+                                >
+                                    <Settings className="w-4 h-4" />
+                                    Settings
+                                </button>
+                            </div>
+                            <div className="border-t border-slate-100 my-1"></div>
+                            <div className="p-2">
+                                <button
+                                    onClick={() => signOut(() => navigate('/login'))}
+                                    className="w-full text-left px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 rounded-xl flex items-center gap-3 transition-colors font-medium"
+                                >
+                                    <LogOut className="w-4 h-4" />
+                                    Sign Out
+                                </button>
+                            </div>
                         </div>
                     )}
                 </div>

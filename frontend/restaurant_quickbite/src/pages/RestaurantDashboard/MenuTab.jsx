@@ -18,6 +18,7 @@ import {
 import AddMenuItemModal from "../../components/AddMenuItemModal";
 import EditMenuItemModal from "../../components/EditMenuItemModal";
 import DeleteConfirmModal from "../../components/DeleteConfirmModal";
+import { getRestaurantById } from "../../api/restaurants";
 
 const MenuTab = ({ restaurantId }) => {
   const [menu, setMenu] = useState([]);
@@ -28,21 +29,31 @@ const MenuTab = ({ restaurantId }) => {
   const [updating, setUpdating] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("All");
+  const [restaurantCategories, setRestaurantCategories] = useState([]);
 
-  // Load menu items for restaurant
+
+  // Load menu items and restaurant details
   useEffect(() => {
-    const loadMenu = async () => {
+    const loadData = async () => {
       try {
-        const res = await getMenuByRestaurant(restaurantId);
-        const items = Array.isArray(res) ? res : res.menu || res.menuItems || [];
+        const [menuRes, restaurantRes] = await Promise.all([
+          getMenuByRestaurant(restaurantId),
+          getRestaurantById(restaurantId)
+        ]);
+
+        const items = Array.isArray(menuRes) ? menuRes : menuRes.menu || menuRes.menuItems || [];
         setMenu(items);
+
+        if (restaurantRes.categories) {
+          setRestaurantCategories(restaurantRes.categories);
+        }
       } catch (err) {
-        console.error("❌ Failed to load menu:", err);
+        console.error("❌ Failed to load data:", err);
       } finally {
         setLoading(false);
       }
     };
-    loadMenu();
+    loadData();
   }, [restaurantId]);
 
   const handleAddItem = (newItem) => setMenu((prev) => [...prev, newItem]);
@@ -213,8 +224,8 @@ const MenuTab = ({ restaurantId }) => {
                 key={category}
                 onClick={() => setCategoryFilter(category)}
                 className={`px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-all ${categoryFilter === category
-                    ? "bg-[#FC8019] text-white shadow-md"
-                    : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                  ? "bg-[#FC8019] text-white shadow-md"
+                  : "bg-gray-100 text-gray-600 hover:bg-gray-200"
                   }`}
               >
                 {category}
@@ -230,11 +241,28 @@ const MenuTab = ({ restaurantId }) => {
           {Object.entries(groupedMenu).map(([category, items], idx) => (
             <div key={`category-${idx}-${category}`}>
               {/* Category Header */}
-              <div className="flex items-center gap-3 mb-4">
-                <h3 className="text-xl font-bold text-gray-900">{category}</h3>
-                <span className="bg-gray-100 text-gray-600 px-3 py-1 rounded-full text-xs font-semibold">
-                  {items.length} {items.length === 1 ? 'item' : 'items'}
-                </span>
+              <div className="flex items-center justify-between mb-4 bg-white p-4 rounded-xl border border-gray-100 shadow-sm">
+                <div className="flex items-center gap-4">
+                  {/* Category Image */}
+                  {(() => {
+                    const catImage = restaurantCategories.find(c => c.name === category)?.image;
+                    return catImage ? (
+                      <img src={catImage} alt={category} className="w-12 h-12 rounded-lg object-cover" />
+                    ) : (
+                      <div className="w-12 h-12 rounded-lg bg-orange-100 flex items-center justify-center text-orange-500">
+                        <Utensils className="w-6 h-6" />
+                      </div>
+                    );
+                  })()}
+
+                  <div>
+                    <h3 className="text-xl font-bold text-gray-900">{category}</h3>
+                    <span className="text-sm text-gray-500">
+                      {items.length} {items.length === 1 ? 'item' : 'items'}
+                    </span>
+                  </div>
+                </div>
+
               </div>
 
               {/* Items Grid */}
@@ -243,8 +271,8 @@ const MenuTab = ({ restaurantId }) => {
                   <div
                     key={item._id || `${category}-${itemIndex}-${item.name}`}
                     className={`bg-white rounded-xl shadow-sm border-2 p-5 hover:shadow-md transition-all ${item.isAvailable
-                        ? "border-gray-200 hover:border-orange-200"
-                        : "border-red-200 bg-gray-50"
+                      ? "border-gray-200 hover:border-orange-200"
+                      : "border-red-200 bg-gray-50"
                       }`}
                   >
                     <div className="flex gap-4">
@@ -290,8 +318,8 @@ const MenuTab = ({ restaurantId }) => {
                             disabled={updating === item._id}
                             onClick={() => handleToggleAvailability(item)}
                             className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${item.isAvailable
-                                ? "bg-green-100 text-green-700 hover:bg-green-200"
-                                : "bg-red-100 text-red-700 hover:bg-red-200"
+                              ? "bg-green-100 text-green-700 hover:bg-green-200"
+                              : "bg-red-100 text-red-700 hover:bg-red-200"
                               } ${updating === item._id ? "opacity-50 cursor-not-allowed" : ""}`}
                           >
                             {item.isAvailable ? (
@@ -383,6 +411,7 @@ const MenuTab = ({ restaurantId }) => {
           onDeleted={handleDeleteItem}
         />
       )}
+
     </div>
   );
 };

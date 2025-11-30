@@ -4,7 +4,7 @@ import { MapPin, Search, ShoppingCart, User } from "lucide-react"
 import { useAuth } from "../context/AuthContext"
 import ProfileCard from "./ProfileCard"
 
-const Navbor = () => {
+const Navbar = () => {
   const { user, logout } = useAuth()
   const [menuOpen, setMenuOpen] = useState(false)
   const [showProfile, setShowProfile] = useState(false)
@@ -14,7 +14,7 @@ const Navbor = () => {
   const handleLogout = async () => {
     try {
       await logout()
-      window.location.href = "/login"
+      window.location.href = "/sign-in"
     } catch (error) {
       console.error("Logout failed:", error)
     }
@@ -103,7 +103,7 @@ const Navbor = () => {
               ) : (
                 <>
                   <Link
-                    to="/login"
+                    to="/sign-in"
                     className="flex items-center gap-2 text-[#FC8019] border border-[#FC8019] font-medium px-3 py-2 rounded-lg hover:bg-[#FC8019] hover:text-white transition"
                   >
                     <User className="w-4 h-4" />
@@ -122,4 +122,4 @@ const Navbor = () => {
   )
 }
 
-export default Navbor
+export default Navbar

@@ -12,11 +12,7 @@ const ReviewSection = ({ restaurantId }) => {
     const [submitting, setSubmitting] = useState(false);
     const [error, setError] = useState("");
 
-    useEffect(() => {
-        fetchReviews();
-    }, [restaurantId]);
-
-    const fetchReviews = async () => {
+    const fetchReviews = React.useCallback(async () => {
         try {
             const { data } = await api.get(`/api/reviews/${restaurantId}`);
             setReviews(data);
@@ -25,7 +21,11 @@ const ReviewSection = ({ restaurantId }) => {
         } finally {
             setLoading(false);
         }
-    };
+    }, [restaurantId]);
+
+    useEffect(() => {
+        fetchReviews();
+    }, [fetchReviews]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();

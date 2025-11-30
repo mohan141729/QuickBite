@@ -116,7 +116,7 @@ const OverviewTab = ({ restaurantId, restaurant }) => {
 
   const stats = [
     {
-      label: "Weekly Revenue",
+      label: "Net Earnings",
       value: "₹" + (metrics.revenue?.current || analytics.weeklyRevenue || 0).toLocaleString(),
       change: metrics.revenue?.change || 0,
       trend: metrics.revenue?.trend || 'up',
@@ -177,14 +177,14 @@ const OverviewTab = ({ restaurantId, restaurant }) => {
                 <div className="flex items-center gap-2">
                   <Package className="w-4 h-4 text-orange-600" />
                   <span className="font-medium">Cuisine:</span>
-                  <span>{restaurant.cuisines?.join(", ") || "Not specified"}</span>
+                  <span>{restaurant.cuisine?.join(", ") || "Not specified"}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Clock className="w-4 h-4 text-orange-600" />
                   <span className="font-medium">Timings:</span>
                   <span>
-                    {restaurant.openingTime && restaurant.closingTime
-                      ? `${restaurant.openingTime} - ${restaurant.closingTime}`
+                    {restaurant.operatingHours?.open && restaurant.operatingHours?.close
+                      ? `${restaurant.operatingHours.open} - ${restaurant.operatingHours.close}`
                       : "Not specified"}
                   </span>
                 </div>
@@ -338,7 +338,7 @@ const OverviewTab = ({ restaurantId, restaurant }) => {
               <tbody>
                 {recentOrders.map((order) => {
                   const id = order._id || order.id || "—";
-                  const customerName = order.customerName || order.customer?.name || "Anonymous";
+                  const customerName = order.user?.name || "Anonymous";
                   const itemCount = order.items?.length || 0;
                   const total = typeof order.totalAmount === "number"
                     ? order.totalAmount

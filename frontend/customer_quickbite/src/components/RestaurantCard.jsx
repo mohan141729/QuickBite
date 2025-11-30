@@ -1,6 +1,7 @@
 import React from "react"
 import { Star, Clock, MapPin, Tag } from "lucide-react"
 import { Link } from "react-router-dom"
+import FavoriteButton from "./FavoriteButton"
 
 const RestaurantCard = ({ restaurant }) => {
   return (
@@ -39,10 +40,15 @@ const RestaurantCard = ({ restaurant }) => {
 
         {/* Promoted Tag (Mock) */}
         {Math.random() > 0.7 && (
-          <div className="absolute top-3 right-3 bg-[#FC8019] text-white text-[10px] font-bold px-2 py-1 rounded-md shadow-sm uppercase tracking-wide">
+          <div className="absolute top-3 left-3 bg-[#FC8019] text-white text-[10px] font-bold px-2 py-1 rounded-md shadow-sm uppercase tracking-wide">
             Promoted
           </div>
         )}
+
+        {/* Favorite Button */}
+        <div className="absolute top-3 right-3 z-20">
+          <FavoriteButton restaurantId={restaurant._id} type="restaurant" className="bg-white/90 hover:bg-white" />
+        </div>
       </div>
 
       {/* Info */}

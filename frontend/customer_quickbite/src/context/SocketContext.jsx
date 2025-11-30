@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { io } from 'socket.io-client';
 import { useAuth } from './AuthContext';
@@ -20,34 +21,29 @@ export const SocketProvider = ({ children }) => {
     useEffect(() => {
         // Only connect if user is logged in
         if (!user) {
-            if (socket) {
-                socket.disconnect();
-                setSocket(null);
-                setIsConnected(false);
-            }
+            setSocket(null);
+            setIsConnected(false);
             return;
         }
 
         // ✅ Initialize Socket.IO connection
-        const newSocket = io('http://localhost:5001', {
+        const socketUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5001';
+        const newSocket = io(socketUrl, {
             withCredentials: true,
             transports: ['websocket', 'polling'],
         });
 
         // Connection events
         newSocket.on('connect', () => {
-            console.log('✅ Connected to WebSocket server:', newSocket.id);
             setIsConnected(true);
 
             // Join user-specific room
             if (user && user._id) {
                 newSocket.emit('join-user-room', user._id);
-                console.log('👤 Joined user room:', user._id);
             }
         });
 
         newSocket.on('disconnect', () => {
-            console.log('❌ Disconnected from WebSocket server');
             setIsConnected(false);
         });
 
@@ -60,7 +56,6 @@ export const SocketProvider = ({ children }) => {
 
         // Cleanup on unmount or user change
         return () => {
-            console.log('🧹 Cleaning up socket connection');
             newSocket.disconnect();
         };
     }, [user]);

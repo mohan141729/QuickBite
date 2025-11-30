@@ -20,32 +20,32 @@ const ProfileCard = ({ onClose }) => {
     setFormData({ ...formData, [e.target.name]: e.target.value })
   }
 
- const handleSubmit = async (e) => {
-  e.preventDefault()
-  setSaving(true)
-  try {
-    const payload = {
-      name: formData.name,
-      phone: formData.phone,
-      address: [
-        {
-          line1: formData.line1,
-          city: formData.city,
-          pincode: formData.pincode,
-        },
-      ],
-    }
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    setSaving(true)
+    try {
+      const payload = {
+        name: formData.name,
+        phone: formData.phone,
+        address: [
+          {
+            line1: formData.line1,
+            city: formData.city,
+            pincode: formData.pincode,
+          },
+        ],
+      }
 
-    const res = await updateProfile(payload)
-    setMessage(res.message || "Profile updated successfully!")
-    setEditMode(false)
-  } catch (error) {
-    console.error("Profile update failed:", error)
-    setMessage("Failed to update profile.")
-  } finally {
-    setSaving(false)
+      const res = await updateProfile(payload)
+      setMessage(res.message || "Profile updated successfully!")
+      setEditMode(false)
+    } catch (error) {
+      console.error("Profile update failed:", error)
+      setMessage("Failed to update profile.")
+    } finally {
+      setSaving(false)
+    }
   }
-}
 
 
   return (
@@ -90,8 +90,14 @@ const ProfileCard = ({ onClose }) => {
                 <p className="flex items-start gap-3">
                   <MapPin className="w-4 h-4 text-gray-400 mt-1" />
                   <span>
-                    {user?.address?.[0]?.line1}, {user?.address?.[0]?.city} -{" "}
-                    {user?.address?.[0]?.pincode}
+                    {user?.address?.[0] ? (
+                      <>
+                        {user.address[0].line1}, {user.address[0].city} -{" "}
+                        {user.address[0].pincode}
+                      </>
+                    ) : (
+                      "Address not set"
+                    )}
                   </span>
                 </p>
               </div>

@@ -27,6 +27,24 @@ const menuItemSchema = new mongoose.Schema(
       type: String,
       trim: true,
     },
+    variants: [{
+      name: { type: String },
+      price: { type: Number }
+    }],
+    addOns: [{
+      name: { type: String },
+      price: { type: Number }
+    }],
+    isVeg: { type: Boolean, default: true },
+    tags: [{ type: String }],
+    nutritionalInfo: {
+      calories: { type: Number },
+      protein: { type: Number },
+      carbs: { type: Number },
+      fats: { type: Number },
+      fiber: { type: Number },
+      sodium: { type: Number }
+    },
     isAvailable: {
       type: Boolean,
       default: true,

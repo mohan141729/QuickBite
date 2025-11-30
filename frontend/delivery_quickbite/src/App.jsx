@@ -27,9 +27,9 @@ function App() {
         }
       />
       <Route path="/login" element={<LoginPage />} />
-      <Route path="/Register" element={<RegisterPage />} />
+      <Route path="/register" element={<RegisterPage />} />
     </Routes>
   );
 }
 
-export default App;
+export default App; // Export App component

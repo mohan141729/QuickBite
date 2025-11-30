@@ -4,7 +4,7 @@ import Restaurant from "../models/Restaurant.js"
 // ✅ Create a menu item (only restaurant owner or admin)
 export const createMenuItem = async (req, res) => {
   try {
-    const { restaurantId, name, description, price, image, category } = req.body
+    const { restaurantId, categoryImage, ...itemData } = req.body
 
     // Ensure restaurant exists
     const restaurant = await Restaurant.findById(restaurantId)
@@ -18,17 +18,27 @@ export const createMenuItem = async (req, res) => {
       return res.status(403).json({ message: "Not authorized to add items" })
     }
 
+    // Create menu item with all fields from request body
     const newItem = await MenuItem.create({
+      ...itemData,
       restaurant: restaurantId,
-      name,
-      description,
-      price,
-      image,
-      category,
     })
 
-    // Push item reference into restaurant (optional but good practice)
+    // Push item reference into restaurant
     restaurant.menu.push(newItem._id)
+
+    // ✅ Update Restaurant Categories if provided
+    if (itemData.category && categoryImage) {
+      const existingCategoryIndex = restaurant.categories.findIndex(c => c.name.toLowerCase() === itemData.category.toLowerCase());
+      if (existingCategoryIndex > -1) {
+        // Update existing category image
+        restaurant.categories[existingCategoryIndex].image = categoryImage;
+      } else {
+        // Add new category
+        restaurant.categories.push({ name: itemData.category, image: categoryImage });
+      }
+    }
+
     await restaurant.save()
 
     res.status(201).json({ message: "Menu item created successfully", item: newItem })
@@ -40,7 +50,23 @@ export const createMenuItem = async (req, res) => {
 // ✅ Get all menu items for a restaurant (public)
 export const getMenuItemsByRestaurant = async (req, res) => {
   try {
-    const menuItems = await MenuItem.find({ restaurant: req.params.restaurantId })
+    const { restaurantId } = req.params
+
+    // Check if restaurant exists
+    const restaurant = await Restaurant.findById(restaurantId)
+    if (!restaurant) {
+      return res.status(404).json({ message: "Restaurant not found" })
+    }
+
+    // Check approval status
+    // Allow if approved OR if the requester is the owner/admin
+    const isOwner = req.user && (req.user._id.toString() === restaurant.owner.toString() || req.user.role === 'admin');
+
+    if (restaurant.status !== "approved" && !isOwner) {
+      return res.status(404).json({ message: "Restaurant not found or not approved" })
+    }
+
+    const menuItems = await MenuItem.find({ restaurant: restaurantId })
     res.json(menuItems)
   } catch (error) {
     res.status(500).json({ message: error.message })
@@ -51,6 +77,13 @@ export const getAllMenuItems = async (req, res) => {
   try {
     const { category, search } = req.query
     let query = {}
+
+    // 1. Get IDs of all approved restaurants
+    const approvedRestaurants = await Restaurant.find({ status: "approved" }).select("_id")
+    const approvedRestaurantIds = approvedRestaurants.map((r) => r._id)
+
+    // 2. Filter menu items to only include those from approved restaurants
+    query.restaurant = { $in: approvedRestaurantIds }
 
     if (category) {
       query.category = { $regex: new RegExp(category, "i") }
@@ -106,7 +139,6 @@ export const updateMenuItem = async (req, res) => {
 
 
 
-
 // ✅ Delete menu item (only owner/admin)
 export const deleteMenuItem = async (req, res) => {
   try {
@@ -119,6 +151,11 @@ export const deleteMenuItem = async (req, res) => {
     ) {
       return res.status(403).json({ message: "Not authorized" })
     }
+
+    // Remove item from restaurant's menu array
+    await Restaurant.findByIdAndUpdate(item.restaurant._id, {
+      $pull: { menu: item._id }
+    });
 
     await item.deleteOne()
     res.json({ message: "Item deleted successfully" })

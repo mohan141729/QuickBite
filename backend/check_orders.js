@@ -1,31 +1,40 @@
-import mongoose from "mongoose";
-import dotenv from "dotenv";
-import Order from "./src/models/Order.js";
 
-dotenv.config();
+import mongoose from 'mongoose';
+import dotenv from 'dotenv';
+import Order from './src/models/Order.js';
+import User from './src/models/User.js'; // Ensure User model is registered
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+dotenv.config({ path: path.join(__dirname, '.env') });
 
 const checkOrders = async () => {
     try {
-        await mongoose.connect(process.env.MONGO_URI);
-        console.log("Connected to MongoDB");
+        const uri = process.env.MONGO_URI || "mongodb://127.0.0.1:27017/quickbite";
+        console.log('Connecting to MongoDB...', uri);
+        await mongoose.connect(uri);
+        console.log('Connected to MongoDB');
 
-        const orders = await Order.find({});
-        console.log(`Total orders: ${orders.length}`);
+        // Fetch last 5 orders and populate user
+        const orders = await Order.find()
+            .sort({ createdAt: -1 })
+            .limit(5)
+            .populate('user', 'name email');
 
-        const readyOrders = orders.filter(o => o.orderStatus === 'ready');
-        const outOrders = orders.filter(o => o.orderStatus === 'out-for-delivery');
+        console.log(`Found ${orders.length} recent orders.`);
 
-        console.log(`Ready orders: ${readyOrders.length}`);
-        console.log(`Out for delivery orders: ${outOrders.length}`);
+        orders.forEach(order => {
+            console.log(`Order ID: ${order._id}`);
+            console.log(`User Field:`, order.user);
+            console.log(`User Name: ${order.user?.name || 'MISSING'}`);
+            console.log('---');
+        });
 
-        if (orders.length > 0) {
-            console.log("Sample order statuses:", orders.map(o => o.orderStatus));
-        }
-
-        process.exit(0);
     } catch (error) {
-        console.error("Error:", error);
-        process.exit(1);
+        console.error('Error:', error);
+    } finally {
+        await mongoose.disconnect();
     }
 };
 

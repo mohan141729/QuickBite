@@ -1,20 +1,34 @@
-import express from "express"
+import express from "express";
 import {
   placeOrder,
+  createOrder,
   getMyOrders,
   getOrdersByRestaurant,
   updateOrderStatus,
   getAllOrders,
-} from "../controllers/orderController.js"
-import protect from "../middleware/authMiddleware.js"
-import admin from "../middleware/adminMiddleware.js"
+  cancelOrder,
+  getOrderById,
+} from "../controllers/orderController.js";
+import { clerkAuth, requireRole, populateUser } from "../middleware/clerkAuth.js";
 
-const router = express.Router()
+const router = express.Router();
 
-router.get("/", protect, admin, getAllOrders)
-router.post("/", protect, placeOrder)
-router.get("/myorders", protect, getMyOrders)
-router.get("/restaurant/:restaurantId", protect, getOrdersByRestaurant)
-router.put("/:id", protect, updateOrderStatus)
+// Admin routes
+router.get("/", clerkAuth, requireRole(['admin']), getAllOrders);
 
-export default router
+// Customer routes
+router.post("/create", clerkAuth, populateUser, createOrder);
+router.post("/place", clerkAuth, populateUser, placeOrder);
+router.get("/myorders", clerkAuth, populateUser, getMyOrders);
+router.put("/:id/cancel", clerkAuth, populateUser, cancelOrder); // Cancel order
+
+// Restaurant owner routes
+router.get("/restaurant/:restaurantId", clerkAuth, requireRole(['restaurant_owner', 'admin']), getOrdersByRestaurant);
+
+// Multi-role routes (restaurant, delivery partner, admin)
+router.put("/:id", clerkAuth, requireRole(['restaurant_owner', 'admin', 'delivery_partner']), updateOrderStatus);
+
+// Get single order (any authenticated user who has access)
+router.get("/:id", clerkAuth, populateUser, getOrderById);
+
+export default router;

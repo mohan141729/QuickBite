@@ -4,19 +4,19 @@ import {
   addToCart,
   updateCartItem,
   removeCartItem,
-  clearCart,       // ✅ Import the new controller
+  clearCart,
 } from "../controllers/cartController.js"
-import protect from "../middleware/authMiddleware.js"
+import { clerkAuth, populateUser } from "../middleware/clerkAuth.js"
 
 const router = express.Router()
 
-router.use(protect)
+router.use(clerkAuth, populateUser)
 
 // 🛒 Cart Routes
 router.get("/", getCart)             // Get logged-in user's cart
 router.post("/", addToCart)          // Add item to cart
 router.put("/:itemId", updateCartItem)  // Update quantity
 router.delete("/:itemId", removeCartItem) // Remove single item
-router.delete("/", clearCart)        // ✅ Clear entire cart
+router.delete("/", clearCart)        // Clear entire cart
 
 export default router

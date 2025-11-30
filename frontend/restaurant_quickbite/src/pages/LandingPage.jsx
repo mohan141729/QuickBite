@@ -23,7 +23,7 @@ const LandingPage = () => {
 
           {!user ? (
             <p className="text-gray-600 text-lg">
-              Join India’s fastest-growing food delivery network.  
+              Join India’s fastest-growing food delivery network.
               Reach thousands of hungry customers every day with QuickBite Partner.
             </p>
           ) : (
@@ -36,16 +36,16 @@ const LandingPage = () => {
             {!user ? (
               <>
                 <Link
-                  to="/register"
+                  to="/sign-up"
                   className="px-6 py-3 bg-gradient-to-r from-[#FC8019] to-[#E23744] text-white rounded-lg font-semibold hover:opacity-90 transition"
                 >
                   Register Your Restaurant
                 </Link>
                 <Link
-                  to="/login"
+                  to="/sign-in"
                   className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-50 transition"
                 >
-                  Login
+                  Sign In
                 </Link>
               </>
             ) : (
@@ -120,7 +120,7 @@ const LandingPage = () => {
               Join now and start getting online orders in just a few hours.
             </p>
             <Link
-              to="/register"
+              to="/sign-up"
               className="px-8 py-3 bg-white text-[#E23744] font-semibold rounded-lg hover:bg-gray-100 transition"
             >
               Get Started

@@ -29,19 +29,15 @@ const FoodCategories = () => {
   const [filteredItems, setFilteredItems] = useState([])
   const [itemsLoading, setItemsLoading] = useState(false)
 
-  // 🧠 Fetch menu data dynamically
+  // 🧠 Fetch categories dynamically
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const { data } = await api.get("/api/menu")
-        // Extract unique categories
-        const uniqueCategories = [
-          ...new Set(data.map((item) => item.category?.trim()).filter(Boolean)),
-        ]
-        // Map categories to icons (fallback for unknown ones)
-        const formatted = uniqueCategories.map((cat) => ({
-          name: cat,
-          img: categoryIcons[cat] || "https://cdn-icons-png.flaticon.com/512/3649/3649829.png",
+        const { data } = await api.get("/api/categories")
+        // Map categories to ensure they have an image
+        const formatted = data.map((cat) => ({
+          name: cat.name,
+          img: cat.image || categoryIcons[cat.name] || "https://cdn-icons-png.flaticon.com/512/3649/3649829.png",
         }))
         setCategories(formatted)
       } catch (err) {

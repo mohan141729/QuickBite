@@ -46,6 +46,6 @@ export default {
     },
   },
   plugins: [
-    require("tailwind-scrollbar-hide"), // hide scrollbars for smooth carousels
+    scrollbarHide, // hide scrollbars for smooth carousels
   ],
 }

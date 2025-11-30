@@ -1,6 +1,23 @@
-import React from "react"
+import React, { useEffect, useState } from "react"
 import { X, CheckCircle2, Bike, UtensilsCrossed, Clock } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
+import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet'
+import 'leaflet/dist/leaflet.css'
+import { useSocket } from "../context/SocketContext"
+import L from 'leaflet'
+
+// Fix Leaflet icon issue
+import icon from 'leaflet/dist/images/marker-icon.png';
+import iconShadow from 'leaflet/dist/images/marker-shadow.png';
+
+let DefaultIcon = L.icon({
+  iconUrl: icon,
+  shadowUrl: iconShadow,
+  iconSize: [25, 41],
+  iconAnchor: [12, 41]
+});
+
+L.Marker.prototype.options.icon = DefaultIcon;
 
 const steps = [
   { label: "Order Placed", icon: <Clock className="w-5 h-5" /> },
@@ -9,7 +26,32 @@ const steps = [
   { label: "Delivered", icon: <CheckCircle2 className="w-5 h-5" /> },
 ]
 
+// Component to center map on marker
+function ChangeView({ center }) {
+  const map = useMap();
+  map.setView(center, map.getZoom());
+  return null;
+}
+
 const TrackOrderDrawer = ({ order, onClose }) => {
+  const { socket } = useSocket();
+  const [driverLocation, setDriverLocation] = useState(null);
+
+  useEffect(() => {
+    if (socket) {
+      socket.on('driver-location-updated', (data) => {
+        console.log("📍 Driver location received:", data);
+        if (data.orderId === order._id && data.location) {
+          setDriverLocation([data.location.lat, data.location.lng]);
+        }
+      });
+
+      return () => {
+        socket.off('driver-location-updated');
+      };
+    }
+  }, [socket, order]);
+
   if (!order) return null
 
   // Map order status to progress step
@@ -19,6 +61,11 @@ const TrackOrderDrawer = ({ order, onClose }) => {
     out_for_delivery: 3,
     delivered: 4,
   }[order.orderStatus] || 1
+
+  // Default center (Bangalore or Order Address)
+  // Ideally use order.address.location if available
+  const defaultCenter = [12.9716, 77.5946];
+  const mapCenter = driverLocation || (order.address?.location ? [order.address.location.lat, order.address.location.lng] : defaultCenter);
 
   return (
     <AnimatePresence>
@@ -49,6 +96,34 @@ const TrackOrderDrawer = ({ order, onClose }) => {
             </button>
           </div>
 
+          {/* Map Section */}
+          {order.orderStatus === 'out_for_delivery' && (
+            <div className="h-64 w-full relative z-0">
+              <MapContainer center={mapCenter} zoom={13} scrollWheelZoom={false} style={{ height: '100%', width: '100%' }}>
+                <TileLayer
+                  attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                />
+                <ChangeView center={mapCenter} />
+                {driverLocation && (
+                  <Marker position={driverLocation}>
+                    <Popup>
+                      Delivery Partner is here! 🚴
+                    </Popup>
+                  </Marker>
+                )}
+                {/* Destination Marker */}
+                {order.address?.location && (
+                  <Marker position={[order.address.location.lat, order.address.location.lng]}>
+                    <Popup>
+                      Your Location 🏠
+                    </Popup>
+                  </Marker>
+                )}
+              </MapContainer>
+            </div>
+          )}
+
           {/* Details */}
           <div className="p-5 border-b bg-gray-50">
             <p className="font-semibold text-gray-900">
@@ -70,8 +145,8 @@ const TrackOrderDrawer = ({ order, onClose }) => {
                 <div key={idx} className="flex items-start gap-4 relative">
                   <div
                     className={`w-8 h-8 flex items-center justify-center rounded-full border-2 ${active
-                        ? "border-orange-500 bg-orange-50 text-orange-600"
-                        : "border-gray-300 text-gray-400"
+                      ? "border-orange-500 bg-orange-50 text-orange-600"
+                      : "border-gray-300 text-gray-400"
                       }`}
                   >
                     {step.icon}

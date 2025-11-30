@@ -1,10 +1,10 @@
-import express from "express"
-import { getProfile, updateProfile } from "../controllers/profileController.js"
-import protect from "../middleware/authMiddleware.js"
+import express from "express";
+import { getProfile, updateProfile } from "../controllers/profileController.js";
+import { clerkAuth, populateUser } from "../middleware/clerkAuth.js";
 
-const router = express.Router()
+const router = express.Router();
 
-router.get("/", protect, getProfile)
-router.put("/", protect, updateProfile)
+router.get("/", clerkAuth, populateUser, getProfile);
+router.put("/", clerkAuth, populateUser, updateProfile);
 
-export default router
+export default router;

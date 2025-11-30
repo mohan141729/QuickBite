@@ -4,12 +4,12 @@ import {
   verifyPayment,
   getAllPayments,
 } from "../controllers/paymentController.js"
-import protect from "../middleware/authMiddleware.js"
+import { clerkAuth, populateUser } from "../middleware/clerkAuth.js"
 
 const router = express.Router()
 
-router.post("/initiate", protect, initiatePayment)
-router.post("/verify", protect, verifyPayment)
-router.get("/", protect, getAllPayments)
+router.post("/initiate", clerkAuth, populateUser, initiatePayment)
+router.post("/verify", clerkAuth, verifyPayment)
+router.get("/", clerkAuth, populateUser, getAllPayments)
 
 export default router

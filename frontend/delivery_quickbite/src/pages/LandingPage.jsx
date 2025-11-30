@@ -20,7 +20,7 @@ const DeliveryLandingPage = () => {
 
         {/* LEFT TEXT SECTION */}
         <div className="md:w-1/2 text-center md:text-left">
-          
+
           {/* AFTER LOGIN */}
           {user ? (
             <>
@@ -45,7 +45,10 @@ const DeliveryLandingPage = () => {
                 </button>
 
                 <button
-                  onClick={logout}
+                  onClick={async () => {
+                    await logout();
+                    navigate("/login");
+                  }}
                   className="px-6 py-3 border border-[#FC8019] text-[#FC8019] font-semibold rounded-lg hover:bg-[#FC8019] hover:text-white transition-all"
                 >
                   Logout

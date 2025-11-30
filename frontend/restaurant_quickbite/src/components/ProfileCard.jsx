@@ -1,9 +1,11 @@
 import React, { useState } from "react"
 import { X, Edit3, Save, Loader2, MapPin, Mail, Phone, User } from "lucide-react"
 import { useAuth } from "../context/AuthContext"
+import { UpdateUserProfile } from "../api/profile"
+import toast from "react-hot-toast"
 
 const ProfileCard = ({ onClose }) => {
-  const { user, updateProfile } = useAuth()
+  const { user } = useAuth()
   const [editMode, setEditMode] = useState(false)
   const [saving, setSaving] = useState(false)
   const [message, setMessage] = useState("")
@@ -20,32 +22,39 @@ const ProfileCard = ({ onClose }) => {
     setFormData({ ...formData, [e.target.name]: e.target.value })
   }
 
- const handleSubmit = async (e) => {
-  e.preventDefault()
-  setSaving(true)
-  try {
-    const payload = {
-      name: formData.name,
-      phone: formData.phone,
-      address: [
-        {
-          line1: formData.line1,
-          city: formData.city,
-          pincode: formData.pincode,
-        },
-      ],
-    }
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    setSaving(true)
+    setMessage("")
+    try {
+      const payload = {
+        name: formData.name,
+        phone: formData.phone,
+        address: [
+          {
+            line1: formData.line1,
+            city: formData.city,
+            pincode: formData.pincode,
+          },
+        ],
+      }
 
-    const res = await updateProfile(payload)
-    setMessage(res.message || "Profile updated successfully!")
-    setEditMode(false)
-  } catch (error) {
-    console.error("Profile update failed:", error)
-    setMessage("Failed to update profile.")
-  } finally {
-    setSaving(false)
+      await UpdateUserProfile(payload)
+      toast.success("Profile updated successfully!")
+      setMessage("Profile updated successfully!")
+      setEditMode(false)
+
+      // Reload to fetch updated user data
+      setTimeout(() => window.location.reload(), 1000)
+    } catch (error) {
+      console.error("Profile update failed:", error)
+      const errorMsg = error.response?.data?.message || "Failed to update profile."
+      toast.error(errorMsg)
+      setMessage(errorMsg)
+    } finally {
+      setSaving(false)
+    }
   }
-}
 
 
   return (

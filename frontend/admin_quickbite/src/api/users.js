@@ -1,19 +1,23 @@
 import api from './axios';
 
 // Get all users
-export const getAllUsers = (params) => api.get('/api/users', { params });
+export const getAllUsers = (params) => api.get('/users', { params });
 
 // Create user
-export const createUser = (data) => api.post('/api/users', data);
+export const createUser = (data) => api.post('/users', data);
 
 // Get user by ID
-export const getUserById = (id) => api.get(`/api/users/${id}`);
+export const getUserById = (id) => api.get(`/users/${id}`);
 
 // Update user
-export const updateUser = (id, data) => api.put(`/api/users/${id}`, data);
+export const updateUser = (id, data) => api.put(`/users/${id}`, data);
 
 // Delete user
-export const deleteUser = (id) => api.delete(`/api/users/${id}`);
+export const deleteUser = (id) => api.delete(`/users/${id}`);
 
 // Toggle user status
-export const toggleUserStatus = (id) => api.put(`/api/users/${id}/toggle-status`);
+// Toggle user status
+export const toggleUserStatus = (id) => api.put(`/users/${id}/toggle-status`);
+
+// Invite admin
+export const inviteAdmin = (email) => api.post('/users/invite', { email });
