@@ -26,6 +26,8 @@ const SignInPage = () => {
                                 rootBox: "shadow-2xl rounded-2xl",
                                 card: "rounded-2xl shadow-none",
                                 footer: "hidden", // Hide the footer which contains the sign-up link
+                                socialButtonsBlockButton: "hidden",
+                                dividerRow: "hidden"
                             }
                         }}
                     />

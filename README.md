@@ -1,143 +1,102 @@
-# QuickBite - Food Delivery Platform
+# QuickBite - Advanced Food Delivery Platform
 
-## Overview
-QuickBite is a comprehensive food delivery platform connecting customers, restaurants, and delivery partners. It features a robust backend and four distinct frontend applications to manage the entire lifecycle of a food order.
+## 🚀 Overview
+**QuickBite** is a full-stack, multi-application food delivery ecosystem designed to streamline the connection between hungry customers, restaurants, and delivery partners. Built with modern web technologies, it features real-time updates, secure authentication, and a premium user experience across four distinct interfaces.
 
-## Live Demo
+## 🌐 Live Applications
 
-| Application | URL | Description |
-| :--- | :--- | :--- |
-| **Customer App** | [Link](https://quick-bite-smoky.vercel.app/) | Browse restaurants, view menus, and place orders. |
-| **Restaurant Dashboard** | [Link](https://restaurant-quickbite.vercel.app/) | Manage menu, orders, and view analytics. |
-| **Admin Dashboard** | [Link](https://admin-quickbite.vercel.app/) | Manage users, restaurants, and monitor platform. |
-| **Delivery App** | [Link](https://deliverypartners-quickbite.vercel.app/) | Receive and fulfill delivery requests. |
-| **Backend API** | [Link](https://quickbite-05uf.onrender.com) | REST API server. |
+| Application | Role | Live URL | Description |
+| :--- | :--- | :--- | :--- |
+| **Customer App** | End User | [Launch App](https://quick-bite-smoky.vercel.app/) | Browse menus, place orders, track delivery, and chat with support. |
+| **Restaurant Dashboard** | Partner | [Launch Dashboard](https://restaurant-quickbite.vercel.app/) | Manage menu, accept orders, and view sales analytics. |
+| **Delivery App** | Partner | [Launch App](https://deliverypartners-quickbite.vercel.app/) | Receive delivery requests, navigate, and track earnings. |
+| **Admin Dashboard** | Administrator | [Launch Dashboard](https://admin-quickbite.vercel.app/) | Oversee platform, manage users, and configure incentives. |
+| **Backend API** | Server | [API Health](https://quickbite-05uf.onrender.com) | Centralized Node.js/Express API with Socket.io. |
 
-## Architecture
+## 🏗️ Architecture
 
-The project is structured as a monorepo containing:
+The project is structured as a monorepo with a centralized backend and four decoupled frontend applications.
 
-- **Backend**: Node.js/Express server handling API requests, database interactions (MongoDB), and real-time updates (Socket.io).
-- **Frontend**: Four separate React applications built with Vite and Tailwind CSS.
+### Tech Stack
+- **Frontend**: React (Vite), Tailwind CSS, Lucide React, Framer Motion
+- **Backend**: Node.js, Express.js, MongoDB (Mongoose)
+- **Real-time**: Socket.io (WebSockets)
+- **Authentication**: Clerk (Secure, role-based auth)
+- **Deployment**: Vercel (Frontend), Render (Backend)
 
 ### Directory Structure
-
 ```
 QuickBite/
-├── backend/                # Node.js API Server
+├── backend/                # Node.js API Server & Socket.io
 ├── frontend/
-│   ├── admin_quickbite/    # Admin Dashboard
-│   ├── customer_quickbite/ # Customer Web App
-│   ├── delivery_quickbite/ # Delivery Partner App
-│   └── restaurant_quickbite/# Restaurant Dashboard
-└── README.md               # This file
+│   ├── admin_quickbite/    # Admin Control Panel
+│   ├── customer_quickbite/ # Customer Interface
+│   ├── delivery_quickbite/ # Delivery Partner Interface
+│   └── restaurant_quickbite/# Restaurant Management Interface
+└── README.md               # Project Documentation
 ```
 
-## Components
+## ✨ Key Features
 
-### 1. Admin Dashboard
-*Path: `frontend/admin_quickbite`*
-- **Users**: Administrators.
-- **Features**:
-    - Monitor platform activity (orders, revenue).
-    - Manage users (customers, delivery partners).
-    - Approve and manage restaurants.
-    - View detailed analytics.
+### 🔐 Authentication & Security
+- **Clerk Integration**: Seamless sign-up/sign-in for all user roles.
+- **Role-Based Access Control (RBAC)**: Protected routes ensuring users only access authorized apps.
+- **Secure API**: JWT verification on backend endpoints.
 
-### 2. Customer App
-*Path: `frontend/customer_quickbite`*
-- **Users**: End customers.
-- **Features**:
-    - Browse restaurants and menus.
-    - Place orders and pay online.
-    - Track order status in real-time.
-    - Rate and review orders.
+### 🍔 Customer Experience
+- **Real-time Tracking**: Watch orders move from "Preparing" to "Delivered" instantly.
+- **Premium UI**: Modern, responsive design with smooth animations.
+- **Smart Chatbot**: AI-powered Help & Support for instant queries.
+- **Order History**: Detailed view of active and past orders.
 
-### 3. Delivery App
-*Path: `frontend/delivery_quickbite`*
-- **Users**: Delivery drivers.
-- **Features**:
-    - Receive delivery requests.
-    - Navigation to restaurant and customer.
-    - Update order status (Picked Up, Delivered).
-    - Track earnings.
+### 👨‍🍳 Restaurant Management
+- **Live Order Dashboard**: Instant notifications for new orders via WebSockets.
+- **Menu Builder**: Easy-to-use interface for adding categories and items.
+- **Analytics**: Visual reports on daily revenue and popular items.
 
-### 4. Restaurant Dashboard
-*Path: `frontend/restaurant_quickbite`*
-- **Users**: Restaurant owners/managers.
-- **Features**:
-    - Manage menu items and categories.
-    - Receive and process orders.
-    - View sales reports and insights.
+### 🚚 Delivery Logistics
+- **Smart Assignment**: Algorithms to assign orders to available partners.
+- **Incentive System**: Time-bound rewards (e.g., "Complete 5 orders between 6-9 PM").
+- **Earnings Tracker**: Daily, weekly, and monthly financial summaries.
 
-## Workflow
+### 🛠️ Admin Control
+- **Platform Oversight**: Global view of all orders and users.
+- **Incentive Management**: Create and manage dynamic incentives for delivery partners.
+- **Content Moderation**: Approve or ban restaurants and users.
 
-1.  **Order Placement**: Customer places an order via the **Customer App**.
-2.  **Acceptance**: Restaurant accepts the order on the **Restaurant Dashboard**.
-3.  **Preparation**: Restaurant prepares the food and marks it as "Ready".
-4.  **Assignment**: System assigns a delivery partner via the **Delivery App**.
-5.  **Pickup**: Delivery partner picks up the order.
-6.  **Delivery**: Delivery partner delivers to the customer.
-7.  **Completion**: Order is marked as delivered; Customer can leave feedback.
-
-## Getting Started
+## 🚀 Getting Started
 
 ### Prerequisites
-- Node.js (v16 or higher)
+- Node.js (v18+)
 - MongoDB (Local or Atlas)
+- Clerk Account (for Auth keys)
 
 ### Installation
 
 1.  **Clone the repository**:
     ```bash
-    git clone <repository-url>
+    git clone https://github.com/yourusername/QuickBite.git
     cd QuickBite
     ```
 
-2.  **Setup Backend**:
+2.  **Backend Setup**:
     ```bash
     cd backend
     npm install
-    # Create .env file with necessary variables (PORT, MONGO_URI, etc.)
+    # Create .env file (see backend/README.md)
     npm run dev
     ```
 
-3.  **Setup Frontends**:
-    Open a new terminal for each frontend you want to run.
-
-    *Admin Dashboard*:
+3.  **Frontend Setup** (Repeat for each app):
     ```bash
-    cd frontend/admin_quickbite
+    cd frontend/customer_quickbite # or admin, delivery, restaurant
     npm install
+    # Create .env.local file (see app specific README.md)
     npm run dev
     ```
 
-    *Customer App*:
-    ```bash
-    cd frontend/customer_quickbite
-    npm install
-    npm run dev
-    ```
-
-    *Delivery App*:
-    ```bash
-    cd frontend/delivery_quickbite
-    npm install
-    npm run dev
-    ```
-
-    *Restaurant Dashboard*:
-    ```bash
-    cd frontend/restaurant_quickbite
-    npm install
-    npm run dev
-    ```
-
-## Technologies
-
-- **Frontend**: React, Vite, Tailwind CSS, Socket.io-client
-- **Backend**: Node.js, Express, MongoDB, Mongoose, Socket.io, JWT
-- **Tools**: Git, npm
+## 🤝 Contributing
+Contributions are welcome! Please fork the repository and submit a pull request.
 
 ---
-*QuickBite Platform © 2025*
+*Built with ❤️ by the QuickBite Team*

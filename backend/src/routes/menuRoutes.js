@@ -1,6 +1,7 @@
 import express from "express"
 import {
   createMenuItem,
+  bulkCreateMenuItems,
   getMenuItemsByRestaurant,
   getMenuItemById,
   updateMenuItem,
@@ -21,6 +22,7 @@ router.get("/restaurant/:restaurantId", attemptAuth, getMenuItemsByRestaurant)
 router.get("/:id", getMenuItemById)
 
 // ✅ Protected routes for restaurant owner
+router.post("/bulk", clerkAuth, requireRole(['restaurant_owner']), bulkCreateMenuItems)
 router.post("/", clerkAuth, requireRole(['restaurant_owner']), createMenuItem)
 router.put("/:id", clerkAuth, requireRole(['restaurant_owner']), updateMenuItem)
 router.delete("/:id", clerkAuth, requireRole(['restaurant_owner']), deleteMenuItem)

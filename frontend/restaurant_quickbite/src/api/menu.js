@@ -37,3 +37,11 @@ export const deleteMenuItem = async (id, token) => {
   });
   return res.data;
 };
+
+// ✅ Bulk Create Menu Items
+export const bulkCreateMenuItems = async (data, token) => {
+  const res = await api.post(`${API_URL}/bulk`, data, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  return res.data;
+};

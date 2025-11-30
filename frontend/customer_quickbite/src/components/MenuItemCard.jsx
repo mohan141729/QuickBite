@@ -5,7 +5,7 @@ import ItemCustomizationModal from "./ItemCustomizationModal"
 import NutritionInfoModal from "./NutritionInfoModal"
 import FavoriteButton from "./FavoriteButton"
 
-const MenuItemCard = ({ item }) => {
+const MenuItemCard = ({ item, disabled }) => {
   const { cartItems, addToCart, updateCartItem, removeFromCart } = useCart()
   const [quantity, setQuantity] = useState(0)
   const [showCustomization, setShowCustomization] = useState(false)
@@ -21,7 +21,7 @@ const MenuItemCard = ({ item }) => {
   // ✅ Sync quantity with cart context
   useEffect(() => {
     const totalQty = cartItems
-      .filter(cartItem => cartItem.menuItem?._id === item._id || cartItem._id === item._id)
+      .filter(cartItem => cartItem.menuItemId === item._id)
       .reduce((sum, cartItem) => sum + cartItem.quantity, 0)
 
     setQuantity(totalQty)
@@ -169,6 +169,10 @@ const MenuItemCard = ({ item }) => {
             {!isAvailable ? (
               <div className="px-6 py-2 text-sm font-bold text-gray-400 uppercase tracking-wide rounded-lg border border-gray-300 bg-gray-100 cursor-not-allowed">
                 UNAVAILABLE
+              </div>
+            ) : disabled ? (
+              <div className="px-6 py-2 text-sm font-bold text-gray-400 uppercase tracking-wide rounded-lg border border-gray-300 bg-gray-100 cursor-not-allowed">
+                CLOSED
               </div>
             ) : quantity === 0 ? (
               <button

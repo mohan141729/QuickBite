@@ -13,17 +13,20 @@ import {
   Image as ImageIcon,
   AlertCircle,
   CheckCircle,
-  Package
+  Package,
+  FileText
 } from "lucide-react";
 import AddMenuItemModal from "../../components/AddMenuItemModal";
 import EditMenuItemModal from "../../components/EditMenuItemModal";
 import DeleteConfirmModal from "../../components/DeleteConfirmModal";
+import BulkUploadModal from "../../components/BulkUploadModal";
 import { getRestaurantById } from "../../api/restaurants";
 
 const MenuTab = ({ restaurantId }) => {
   const [menu, setMenu] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showAddModal, setShowAddModal] = useState(false);
+  const [showBulkModal, setShowBulkModal] = useState(false);
   const [editItem, setEditItem] = useState(null);
   const [deleteItem, setDeleteItem] = useState(null);
   const [updating, setUpdating] = useState(null);
@@ -142,13 +145,22 @@ const MenuTab = ({ restaurantId }) => {
             Manage your restaurant's menu offerings and availability
           </p>
         </div>
-        <button
-          onClick={() => setShowAddModal(true)}
-          className="flex items-center gap-2 bg-[#FC8019] hover:bg-[#e66e16] text-white px-5 py-2.5 rounded-lg font-semibold transition-all shadow-md hover:shadow-lg"
-        >
-          <Plus className="w-5 h-5" />
-          Add Menu Item
-        </button>
+        <div className="flex gap-3">
+          <button
+            onClick={() => setShowBulkModal(true)}
+            className="flex items-center gap-2 bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 px-5 py-2.5 rounded-lg font-semibold transition-all shadow-sm hover:shadow-md"
+          >
+            <FileText className="w-5 h-5" />
+            Bulk Upload
+          </button>
+          <button
+            onClick={() => setShowAddModal(true)}
+            className="flex items-center gap-2 bg-[#FC8019] hover:bg-[#e66e16] text-white px-5 py-2.5 rounded-lg font-semibold transition-all shadow-md hover:shadow-lg"
+          >
+            <Plus className="w-5 h-5" />
+            Add Menu Item
+          </button>
+        </div>
       </div>
 
       {/* Stats Bar */}
@@ -394,6 +406,16 @@ const MenuTab = ({ restaurantId }) => {
         <AddMenuItemModal
           onClose={() => setShowAddModal(false)}
           onAdded={handleAddItem}
+          restaurantId={restaurantId}
+        />
+      )}
+      {showBulkModal && (
+        <BulkUploadModal
+          onClose={() => setShowBulkModal(false)}
+          onSuccess={(newItems) => {
+            setMenu(prev => [...prev, ...newItems]);
+            setShowBulkModal(false);
+          }}
           restaurantId={restaurantId}
         />
       )}

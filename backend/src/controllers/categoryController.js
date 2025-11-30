@@ -64,3 +64,54 @@ export const deleteCategory = async (req, res) => {
         res.status(500).json({ message: error.message });
     }
 };
+
+// Bulk create categories (Admin only)
+export const bulkCreateCategories = async (req, res) => {
+    try {
+        const { items } = req.body; // items is an array of category objects
+
+        if (!Array.isArray(items) || items.length === 0) {
+            return res.status(400).json({ message: "Items array is required and cannot be empty" });
+        }
+
+        const createdItems = [];
+        const errors = [];
+
+        for (const itemData of items) {
+            try {
+                if (!itemData.name) {
+                    errors.push({ item: itemData, error: "Missing required field: name" });
+                    continue;
+                }
+
+                // Check for existing category (case-insensitive)
+                const existingCategory = await Category.findOne({ name: { $regex: new RegExp(`^${itemData.name}$`, 'i') } });
+                if (existingCategory) {
+                    errors.push({ item: itemData, error: `Category '${itemData.name}' already exists` });
+                    continue;
+                }
+
+                const newCategory = await Category.create({
+                    name: itemData.name,
+                    image: itemData.image || "",
+                    description: itemData.description || "",
+                    isActive: itemData.isActive !== undefined ? itemData.isActive : true
+                });
+
+                createdItems.push(newCategory);
+            } catch (err) {
+                errors.push({ item: itemData, error: err.message });
+            }
+        }
+
+        res.status(201).json({
+            message: `Successfully added ${createdItems.length} categories. ${errors.length} failed.`,
+            createdItems,
+            errors
+        });
+
+    } catch (error) {
+        console.error("Bulk create categories error:", error);
+        res.status(500).json({ message: error.message });
+    }
+};

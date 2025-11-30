@@ -19,3 +19,12 @@ export const deleteCategory = async (id) => {
     const response = await api.delete(`/categories/${id}`);
     return response.data;
 };
+
+export const bulkCreateCategories = async (data, token) => {
+    const response = await api.post('/categories/bulk', data, {
+        headers: {
+            'Authorization': `Bearer ${token}`
+        }
+    });
+    return response.data;
+};

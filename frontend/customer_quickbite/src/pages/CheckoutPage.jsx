@@ -98,7 +98,7 @@ const CheckoutPage = () => {
       const orderData = {
         restaurant: restaurantId,
         items: cartItems.map((item) => ({
-          menuItem: item._id, // CartContext ensures _id is the menuItem ID
+          menuItem: item.menuItemId, // Use the stored MenuItem ID
           quantity: item.quantity,
           price: item.price,
           selectedVariant: item.selectedVariant, // Pass variant info

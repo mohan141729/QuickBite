@@ -22,6 +22,7 @@ import couponRoutes from "./routes/couponRoutes.js";
 import recommendationRoutes from "./routes/recommendationRoutes.js";
 import categoryRoutes from "./routes/categoryRoutes.js";
 import favoriteRoutes from "./routes/favoriteRoutes.js";
+import incentiveRoutes from "./routes/incentiveRoutes.js";
 
 const app = express();
 const httpServer = createServer(app);
@@ -134,6 +135,7 @@ app.use("/api/coupons", couponRoutes);
 app.use("/api/recommendations", recommendationRoutes);
 app.use("/api/categories", categoryRoutes);
 app.use("/api/favorites", favoriteRoutes); // Favorites routes
+app.use("/api/incentives", incentiveRoutes);
 
 // Global Error Handler
 app.use((err, req, res, next) => {
@@ -157,6 +159,11 @@ io.on('connection', (socket) => {
   socket.on('join-restaurant-room', (restaurantId) => {
     socket.join(`restaurant-${restaurantId}`);
     console.log(`🍽️ Restaurant ${restaurantId} joined their room`);
+  });
+
+  socket.on('join-delivery-room', () => {
+    socket.join('delivery-partners');
+    console.log(`🚚 Client ${socket.id} joined delivery-partners room`);
   });
 
   socket.on('update-location', (data) => {

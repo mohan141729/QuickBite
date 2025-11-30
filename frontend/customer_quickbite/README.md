@@ -1,38 +1,58 @@
 # QuickBite Customer App
 
-## Live URL
+## 📱 Overview
+The **Customer App** is the primary interface for users to interact with the QuickBite platform. It offers a seamless experience for discovering restaurants, customizing orders, and tracking deliveries in real-time.
+
+## 🔗 Live URL
 [https://quick-bite-smoky.vercel.app/](https://quick-bite-smoky.vercel.app/)
 
-The Customer App allows users to discover restaurants, browse menus, and order food for delivery.
+## ✨ Key Features
 
-## Features
+### 🍽️ Discovery & Ordering
+- **Smart Search**: Find restaurants by cuisine, name, or dish.
+- **Visual Menu**: High-quality images for every dish.
+- **Customization**: Add toppings, choose sizes, and add special instructions.
+- **Secure Checkout**: Integrated payment flow.
 
-- **Restaurant Discovery**: Browse restaurants by category, rating, or location.
-- **Menu Browsing**: View detailed menus with images and prices.
-- **Cart & Checkout**: Add items to cart and place orders securely.
-- **Order Tracking**: Real-time updates on order status.
-- **User Profile**: Manage addresses, payment methods, and order history.
+### 📦 Order Management
+- **Real-time Tracking**: Live status updates via WebSockets.
+- **My Orders Revamp**: 
+    - **Tabs**: Separate views for Active and Past orders.
+    - **Premium Cards**: Visual order summaries with restaurant logos.
+    - **Actions**: One-tap "Track", "Reorder", or "Rate".
 
-## Tech Stack
+### 💬 Help & Support
+- **Interactive Chatbot**: Instant answers for common queries (Refunds, Tracking).
+- **Quick Actions**: Pre-defined buttons for fast support.
+- **Direct Contact**: Easy access to email and phone support.
 
-- **Framework**: React (Vite)
-- **Styling**: Tailwind CSS
-- **State Management**: React Context / Hooks
-- **Routing**: React Router
+## 🛠️ Tech Stack
+- **Frontend**: React 18, Vite
+- **Styling**: Tailwind CSS, Framer Motion (Animations)
+- **Icons**: Lucide React
+- **State**: Context API
+- **Auth**: Clerk
 
-## Setup
+## ⚙️ Setup & Installation
 
-1. Install dependencies:
-   ```bash
-   npm install
-   ```
+1.  **Navigate to directory**:
+    ```bash
+    cd frontend/customer_quickbite
+    ```
 
-2. Start the development server:
-   ```bash
-   npm run dev
-   ```
+2.  **Install Dependencies**:
+    ```bash
+    npm install
+    ```
 
-3. Build for production:
-   ```bash
-   npm run build
-   ```
+3.  **Environment Variables**:
+    Create `.env.local`:
+    ```env
+    VITE_API_URL=http://localhost:5001
+    VITE_CLERK_PUBLISHABLE_KEY=pk_test_...
+    ```
+
+4.  **Run Development Server**:
+    ```bash
+    npm run dev
+    ```

@@ -1,15 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { getCategories, createCategory, updateCategory, deleteCategory } from '../api/categories';
 import TopBar from '../components/TopBar';
-import { Plus, Search, Edit2, Trash2, X, Loader2, Image as ImageIcon, Grid } from 'lucide-react';
+import { Plus, Search, Edit2, Trash2, X, Loader2, Image as ImageIcon, Grid, FileText } from 'lucide-react';
 import toast from 'react-hot-toast';
 import ImageUpload from '../components/ImageUpload';
+import BulkUploadModal from '../components/BulkUploadModal';
 
 const Categories = () => {
     const [categories, setCategories] = useState([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isBulkModalOpen, setIsBulkModalOpen] = useState(false);
     const [editingCategory, setEditingCategory] = useState(null);
     const [formData, setFormData] = useState({
         name: '',
@@ -117,13 +119,22 @@ const Categories = () => {
                         </h2>
                         <p className="text-slate-500 mt-1 ml-11">Manage global food categories</p>
                     </div>
-                    <button
-                        onClick={() => handleOpenModal()}
-                        className="bg-indigo-600 text-white px-6 py-2.5 rounded-xl shadow-lg shadow-indigo-500/30 hover:bg-indigo-700 hover:scale-105 transition-all duration-300 font-medium flex items-center gap-2"
-                    >
-                        <Plus className="w-5 h-5" />
-                        Add Category
-                    </button>
+                    <div className="flex gap-3">
+                        <button
+                            onClick={() => setIsBulkModalOpen(true)}
+                            className="bg-white border border-indigo-200 text-indigo-700 px-6 py-2.5 rounded-xl shadow-sm hover:bg-indigo-50 hover:border-indigo-300 transition-all duration-300 font-medium flex items-center gap-2"
+                        >
+                            <FileText className="w-5 h-5" />
+                            Bulk Upload
+                        </button>
+                        <button
+                            onClick={() => handleOpenModal()}
+                            className="bg-indigo-600 text-white px-6 py-2.5 rounded-xl shadow-lg shadow-indigo-500/30 hover:bg-indigo-700 hover:scale-105 transition-all duration-300 font-medium flex items-center gap-2"
+                        >
+                            <Plus className="w-5 h-5" />
+                            Add Category
+                        </button>
+                    </div>
                 </div>
 
                 {/* Search */}
@@ -264,6 +275,18 @@ const Categories = () => {
                             </form>
                         </div>
                     </div>
+                )}
+
+                {/* Bulk Upload Modal */}
+                {isBulkModalOpen && (
+                    <BulkUploadModal
+                        onClose={() => setIsBulkModalOpen(false)}
+                        onSuccess={(newCategories) => {
+                            setCategories(prev => [...prev, ...newCategories]);
+                            setIsBulkModalOpen(false);
+                            toast.success(`Successfully added ${newCategories.length} categories`);
+                        }}
+                    />
                 )}
             </div>
         </div>

@@ -59,6 +59,13 @@ const OrdersTab = ({ restaurantId }) => {
   useEffect(() => {
     if (!socket) return;
 
+    // ✅ Explicitly join the restaurant room to ensure we receive updates
+    // This fixes issues where the context might not have joined automatically
+    if (restaurantId) {
+      socket.emit('join-restaurant-room', restaurantId);
+      console.log('🔌 OrdersTab explicitly joined room:', restaurantId);
+    }
+
     const handleOrderStatusUpdate = (data) => {
       console.log('📡 Restaurant received order status update:', data);
 
@@ -395,14 +402,39 @@ const OrdersTab = ({ restaurantId }) => {
                     {isExpanded && (
                       <ul className="mt-3 space-y-2 border-t border-gray-200 pt-3">
                         {order.items?.map((item, i) => (
-                          <li key={i} className="flex justify-between items-center text-sm">
-                            <span className="text-gray-700">
-                              <span className="font-semibold text-[#FC8019]">{item.quantity}×</span>{" "}
-                              {item.menuItem?.name || "Item"}
-                            </span>
-                            <span className="text-gray-600 font-medium">
-                              ₹{((item.menuItem?.price || 0) * item.quantity).toFixed(2)}
-                            </span>
+                          <li key={i} className="flex flex-col text-sm py-2 border-b border-gray-100 last:border-0">
+                            <div className="flex justify-between items-start">
+                              <span className="text-gray-700 font-medium">
+                                <span className="font-bold text-[#FC8019] mr-1">{item.quantity}×</span>
+                                {item.menuItem?.name || "Item"}
+                              </span>
+                              <span className="text-gray-600 font-medium">
+                                ₹{((item.price || item.menuItem?.price || 0) * item.quantity).toFixed(2)}
+                              </span>
+                            </div>
+
+                            {/* Variants & Add-ons */}
+                            {(item.selectedVariant || (item.selectedAddOns && item.selectedAddOns.length > 0)) && (
+                              <div className="ml-6 mt-1 text-xs text-gray-500 space-y-0.5">
+                                {item.selectedVariant && (
+                                  <div className="flex items-center gap-1">
+                                    <span className="font-medium text-gray-600">Variant:</span>
+                                    <span>{item.selectedVariant.name}</span>
+                                    {item.selectedVariant.price > 0 && <span>(+₹{item.selectedVariant.price})</span>}
+                                  </div>
+                                )}
+                                {item.selectedAddOns && item.selectedAddOns.length > 0 && (
+                                  <div className="flex flex-col">
+                                    <span className="font-medium text-gray-600">Add-ons:</span>
+                                    {item.selectedAddOns.map((addon, idx) => (
+                                      <span key={idx} className="pl-2">
+                                        + {addon.name} {addon.price > 0 && `(₹${addon.price})`}
+                                      </span>
+                                    ))}
+                                  </div>
+                                )}
+                              </div>
+                            )}
                           </li>
                         ))}
                       </ul>

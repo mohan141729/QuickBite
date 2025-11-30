@@ -1,38 +1,53 @@
 # QuickBite Delivery Partner App
 
-## Live URL
+## 🚚 Overview
+The **Delivery Partner App** is the essential tool for drivers to receive, track, and fulfill orders. It features real-time navigation, earnings tracking, and an incentive system to maximize driver revenue.
+
+## 🔗 Live URL
 [https://deliverypartners-quickbite.vercel.app/](https://deliverypartners-quickbite.vercel.app/)
 
-The Delivery App is designed for delivery partners to accept and fulfill orders efficiently.
+## ✨ Key Features
 
-## Features
+### 📦 Order Fulfillment
+- **Instant Alerts**: Receive push notifications for new delivery requests.
+- **Smart Navigation**: Integrated maps for pickup and drop-off locations.
+- **Status Updates**: One-tap updates for `Picked Up` and `Delivered`.
 
-- **Order Requests**: Receive and accept/reject delivery requests.
-- **Navigation**: View pickup and drop-off locations.
-- **Order Status**: Update status (Picked Up, Delivered).
-- **Earnings**: Track daily and weekly earnings.
-- **Profile**: Manage availability and personal details.
+### 💰 Earnings & Incentives
+- **Live Earnings**: Track daily income in real-time.
+- **Incentive System**: View and track progress on active bonus offers (e.g., "Earn $10 extra for 5 deliveries").
+- **History**: Detailed log of all completed deliveries and payouts.
 
-## Tech Stack
+### 📍 Availability & Profile
+- **Online/Offline Mode**: Toggle availability with a single switch.
+- **Performance Stats**: View ratings, completion rates, and feedback.
 
-- **Framework**: React (Vite)
+## 🛠️ Tech Stack
+- **Frontend**: React 18, Vite
 - **Styling**: Tailwind CSS
-- **State Management**: React Context / Hooks
-- **Routing**: React Router
+- **Real-time**: Socket.io Client
+- **Auth**: Clerk (Delivery Partner Role)
 
-## Setup
+## ⚙️ Setup & Installation
 
-1. Install dependencies:
-   ```bash
-   npm install
-   ```
+1.  **Navigate to directory**:
+    ```bash
+    cd frontend/delivery_quickbite
+    ```
 
-2. Start the development server:
-   ```bash
-   npm run dev
-   ```
+2.  **Install Dependencies**:
+    ```bash
+    npm install
+    ```
 
-3. Build for production:
-   ```bash
-   npm run build
-   ```
+3.  **Environment Variables**:
+    Create `.env.local`:
+    ```env
+    VITE_API_URL=http://localhost:5001
+    VITE_CLERK_PUBLISHABLE_KEY=pk_test_...
+    ```
+
+4.  **Run Development Server**:
+    ```bash
+    npm run dev
+    ```

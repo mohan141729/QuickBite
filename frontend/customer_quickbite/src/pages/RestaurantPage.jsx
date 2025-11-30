@@ -4,8 +4,9 @@ import { getRestaurantById } from "../api/restaurant"
 import { getMenuItemsByRestaurant } from "../api/menu"
 import MenuItemCard from "../components/MenuItemCard"
 import ReviewSection from "../components/ReviewSection"
-import { Star, MapPin, Clock, Search, Filter } from "lucide-react"
+import { Star, MapPin, Clock, Search, Filter, AlertCircle } from "lucide-react"
 import Navbar from "../components/Navbar"
+import { isRestaurantOpen, formatTime } from "../utils/timeUtils"
 
 const RestaurantPage = () => {
     const { id } = useParams()
@@ -43,9 +44,21 @@ const RestaurantPage = () => {
 
     const categories = ["Recommended", ...Object.keys(groupedMenu).filter(c => c !== "Recommended")]
 
+    const isOpen = restaurant ? isRestaurantOpen(restaurant) : false;
+
     return (
         <div className="min-h-screen bg-gray-50 pb-20">
             <Navbar />
+
+            {/* Closed Banner */}
+            {!isOpen && (
+                <div className="bg-red-600 text-white text-center py-3 px-4 font-medium sticky top-[72px] z-50 shadow-md flex items-center justify-center gap-2 animate-fade-in">
+                    <AlertCircle className="w-5 h-5" />
+                    <span>
+                        Restaurant is currently closed. Opens at {restaurant?.operatingHours?.open ? formatTime(restaurant.operatingHours.open) : 'N/A'}.
+                    </span>
+                </div>
+            )}
 
             {/* Hero Section - Full Width */}
             <div className="relative w-full h-[350px] md:h-[400px]">
@@ -158,7 +171,7 @@ const RestaurantPage = () => {
                                         </h2>
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                             {items.map(item => (
-                                                <MenuItemCard key={item._id} item={item} />
+                                                <MenuItemCard key={item._id} item={item} disabled={!isOpen} />
                                             ))}
                                         </div>
                                     </div>

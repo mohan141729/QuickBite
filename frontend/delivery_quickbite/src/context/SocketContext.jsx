@@ -25,6 +25,10 @@ export const SocketProvider = ({ children }) => {
                 console.log("✅ Connected to socket server:", newSocket.id);
                 // Join user room (for notifications)
                 newSocket.emit("join-user-room", user._id); // Assuming delivery partner is also a user
+
+                // ✅ Join delivery partners room for new order notifications
+                newSocket.emit("join-delivery-room");
+                console.log("🚚 Joined delivery-partners room");
             });
 
             return () => {

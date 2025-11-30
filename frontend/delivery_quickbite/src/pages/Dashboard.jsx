@@ -19,6 +19,7 @@ import {
     Award,
     AlertCircle,
 } from "lucide-react";
+import IncentiveCarousel from "../components/IncentiveCarousel";
 
 const Dashboard = () => {
     const { user } = useAuth();
@@ -28,6 +29,8 @@ const Dashboard = () => {
         todayEarnings: 0,
         todayDeliveries: 0,
         weekDeliveries: 0,
+        monthDeliveries: 0,
+        monthEarnings: 0,
         avgRating: 0,
         activeOrders: 0,
     });
@@ -128,10 +131,16 @@ const Dashboard = () => {
                 weekAgo.setDate(weekAgo.getDate() - 7);
                 const weekOrders = historyResponse.data.orders.filter(order => new Date(order.updatedAt) >= weekAgo);
 
+                const monthAgo = new Date();
+                monthAgo.setMonth(monthAgo.getMonth() - 1);
+                const monthOrders = historyResponse.data.orders.filter(order => new Date(order.updatedAt) >= monthAgo);
+
                 setStats({
                     todayEarnings: todayOrders.length * 40,
                     todayDeliveries: todayOrders.length,
                     weekDeliveries: weekOrders.length,
+                    monthDeliveries: monthOrders.length,
+                    monthEarnings: monthOrders.length * 40,
                     avgRating: 4.7,
                     activeOrders: ordersResponse.data.orders?.length || 0,
                 });
@@ -201,270 +210,304 @@ const Dashboard = () => {
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-red-50">
+        <div className="min-h-screen bg-gray-50 pb-20 md:pb-0">
             <Navbar />
 
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                <div className="mb-8 animate-fade-in">
-                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                        <div>
-                            <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">
-                                Welcome back, <span className="gradient-text">{user?.name?.split(" ")[0]}</span>! 👋
-                            </h1>
-                            <p className="text-gray-600">Here's what's happening with your deliveries today</p>
-                        </div>
-
-                        <button
-                            onClick={toggleAvailability}
-                            className={`flex items-center gap-3 px-6 py-3 rounded-full font-semibold transition-all transform hover:scale-105 ${isOnline
-                                ? "bg-green-500 text-white shadow-lg shadow-green-500/30"
-                                : "bg-gray-400 text-white shadow-lg shadow-gray-400/30"
-                                }`}
-                        >
-                            <div className={`w-3 h-3 rounded-full ${isOnline ? "bg-white animate-pulse" : "bg-gray-200"}`} />
-                            {isOnline ? "Online" : "Offline"}
-                        </button>
+                {/* Header Section */}
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
+                    <div>
+                        <h1 className="text-2xl md:text-3xl font-bold text-gray-900">
+                            Hello, {user?.name?.split(" ")[0]} 👋
+                        </h1>
+                        <p className="text-gray-500 mt-1">Let's deliver some happiness today!</p>
                     </div>
+
+                    <button
+                        onClick={toggleAvailability}
+                        className={`group relative px-6 py-3 rounded-full font-bold transition-all duration-300 shadow-lg hover:shadow-xl ${isOnline
+                            ? "bg-gradient-to-r from-green-500 to-emerald-600 text-white"
+                            : "bg-white text-gray-400 border border-gray-200"
+                            }`}
+                    >
+                        <div className="flex items-center gap-3">
+                            <div className={`w-3 h-3 rounded-full ${isOnline ? "bg-white animate-pulse" : "bg-gray-300"}`} />
+                            <span>{isOnline ? "You are Online" : "You are Offline"}</span>
+                        </div>
+                    </button>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                    <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100 card-hover animate-slide-up">
-                        <div className="flex items-center justify-between mb-4">
-                            <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl flex items-center justify-center">
-                                <DollarSign className="w-6 h-6 text-white" />
+                {/* Incentives Section */}
+                <div className="mb-8">
+                    <div className="flex items-center justify-between mb-4">
+                        <h2 className="text-xl font-bold text-gray-900">Active Incentives</h2>
+                        <button className="text-sm font-medium text-orange-600 hover:text-orange-700">View All</button>
+                    </div>
+                    <IncentiveCarousel stats={stats} />
+                </div>
+
+                {/* Stats Grid */}
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+                    <div className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+                        <div className="flex items-center gap-3 mb-2">
+                            <div className="p-2 bg-green-50 rounded-lg text-green-600">
+                                <DollarSign size={20} />
                             </div>
-                            <span className="text-xs font-semibold text-green-600 bg-green-50 px-2 py-1 rounded-full flex items-center gap-1">
-                                <TrendingUp className="w-3 h-3" /> +12%
-                            </span>
+                            <span className="text-sm font-medium text-gray-500">Earnings</span>
                         </div>
-                        <h3 className="text-gray-600 text-sm font-medium mb-1">Today's Earnings</h3>
-                        <p className="text-3xl font-bold text-gray-900">₹{stats.todayEarnings}</p>
-                        <p className="text-xs text-gray-500 mt-2">{stats.todayDeliveries} deliveries</p>
+                        <p className="text-2xl font-bold text-gray-900">₹{stats.todayEarnings}</p>
+                        <p className="text-xs text-green-600 mt-1 font-medium">+12% vs yesterday</p>
                     </div>
 
-                    <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100 card-hover animate-slide-up" style={{ animationDelay: "0.1s" }}>
-                        <div className="flex items-center justify-between mb-4">
-                            <div className="w-12 h-12 bg-gradient-to-br from-orange-500 to-red-600 rounded-xl flex items-center justify-center">
-                                <Package className="w-6 h-6 text-white" />
+                    <div className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+                        <div className="flex items-center gap-3 mb-2">
+                            <div className="p-2 bg-orange-50 rounded-lg text-orange-600">
+                                <Package size={20} />
                             </div>
+                            <span className="text-sm font-medium text-gray-500">Deliveries</span>
                         </div>
-                        <h3 className="text-gray-600 text-sm font-medium mb-1">This Week</h3>
-                        <p className="text-3xl font-bold text-gray-900">{stats.weekDeliveries}</p>
-                        <p className="text-xs text-gray-500 mt-2">deliveries completed</p>
+                        <p className="text-2xl font-bold text-gray-900">{stats.todayDeliveries}</p>
+                        <p className="text-xs text-gray-400 mt-1">Today's total</p>
                     </div>
 
-                    <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100 card-hover animate-slide-up" style={{ animationDelay: "0.2s" }}>
-                        <div className="flex items-center justify-between mb-4">
-                            <div className="w-12 h-12 bg-gradient-to-br from-yellow-500 to-orange-600 rounded-xl flex items-center justify-center">
-                                <Star className="w-6 h-6 text-white" />
+                    <div className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+                        <div className="flex items-center gap-3 mb-2">
+                            <div className="p-2 bg-blue-50 rounded-lg text-blue-600">
+                                <Clock size={20} />
                             </div>
+                            <span className="text-sm font-medium text-gray-500">Hours</span>
                         </div>
-                        <h3 className="text-gray-600 text-sm font-medium mb-1">Average Rating</h3>
-                        <p className="text-3xl font-bold text-gray-900">{stats.avgRating}</p>
-                        <div className="flex items-center gap-1 mt-2">
+                        <p className="text-2xl font-bold text-gray-900">4.5</p>
+                        <p className="text-xs text-gray-400 mt-1">Active hours</p>
+                    </div>
+
+                    <div className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+                        <div className="flex items-center gap-3 mb-2">
+                            <div className="p-2 bg-purple-50 rounded-lg text-purple-600">
+                                <TrendingUp size={20} />
+                            </div>
+                            <span className="text-sm font-medium text-gray-500">Monthly</span>
+                        </div>
+                        <p className="text-2xl font-bold text-gray-900">₹{stats.monthEarnings}</p>
+                        <p className="text-xs text-gray-400 mt-1">{stats.monthDeliveries} Deliveries</p>
+                    </div>
+
+                    <div className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+                        <div className="flex items-center gap-3 mb-2">
+                            <div className="p-2 bg-yellow-50 rounded-lg text-yellow-600">
+                                <Star size={20} />
+                            </div>
+                            <span className="text-sm font-medium text-gray-500">Rating</span>
+                        </div>
+                        <p className="text-2xl font-bold text-gray-900">{stats.avgRating}</p>
+                        <div className="flex gap-0.5 mt-1">
                             {[...Array(5)].map((_, i) => (
-                                <Star key={i} className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                                <Star key={i} size={12} className={`${i < Math.floor(stats.avgRating) ? "fill-yellow-400 text-yellow-400" : "text-gray-200"}`} />
                             ))}
                         </div>
-                    </div>
-
-                    <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100 card-hover animate-slide-up" style={{ animationDelay: "0.3s" }}>
-                        <div className="flex items-center justify-between mb-4">
-                            <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center">
-                                <Bike className="w-6 h-6 text-white" />
-                            </div>
-                        </div>
-                        <h3 className="text-gray-600 text-sm font-medium mb-1">Active Orders</h3>
-                        <p className="text-3xl font-bold text-gray-900">{stats.activeOrders}</p>
-                        <p className="text-xs text-gray-500 mt-2">ready to deliver</p>
                     </div>
                 </div>
 
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    {/* Main Content Area */}
                     <div className="lg:col-span-2 space-y-6">
-                        {activeDelivery && (
-                            <div className="bg-gradient-to-br from-orange-500 to-red-600 rounded-2xl p-6 shadow-xl text-white animate-slide-up">
-                                <div className="flex items-center gap-2 mb-4">
-                                    <Bike className="w-6 h-6 animate-bounce" />
-                                    <h2 className="text-xl font-bold">Active Delivery</h2>
-                                </div>
 
-                                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 mb-4">
-                                    <div className="flex justify-between items-start mb-3">
-                                        <div>
-                                            <h3 className="font-bold text-lg">{activeDelivery.restaurant?.name || "Restaurant"}</h3>
-                                            <p className="text-sm text-white/80">Order #{activeDelivery._id.slice(-6).toUpperCase()}</p>
+                        {/* Active Delivery Card */}
+                        {activeDelivery ? (
+                            <div className="bg-white rounded-3xl shadow-xl border border-orange-100 overflow-hidden relative">
+                                <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-orange-500 to-red-600" />
+                                <div className="p-6">
+                                    <div className="flex justify-between items-center mb-6">
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center animate-pulse">
+                                                <Bike className="w-6 h-6 text-orange-600" />
+                                            </div>
+                                            <div>
+                                                <h2 className="text-lg font-bold text-gray-900">Active Delivery</h2>
+                                                <p className="text-sm text-orange-600 font-medium">
+                                                    {activeDelivery.orderStatus === 'preparing' ? 'Waiting at Restaurant' :
+                                                        activeDelivery.orderStatus === 'ready' ? 'Ready for Pickup' :
+                                                            activeDelivery.orderStatus === 'picked_up' ? 'On the way to Customer' : 'In Progress'}
+                                                </p>
+                                            </div>
                                         </div>
-                                        <span className="px-3 py-1 bg-white/20 rounded-full text-xs font-semibold">
-                                            ₹40.00
+                                        <span className="px-4 py-2 bg-gray-900 text-white rounded-xl font-bold text-sm">
+                                            #{activeDelivery._id.slice(-4).toUpperCase()}
                                         </span>
                                     </div>
 
-                                    <div className="space-y-2">
-                                        <div className="flex items-start gap-2">
-                                            <MapPin className="w-4 h-4 mt-0.5 flex-shrink-0" />
+                                    {/* Timeline */}
+                                    <div className="relative pl-8 space-y-8 mb-8">
+                                        {/* Vertical Line */}
+                                        <div className="absolute left-3 top-2 bottom-2 w-0.5 bg-gray-200" />
+
+                                        {/* Restaurant Point */}
+                                        <div className="relative">
+                                            <div className="absolute -left-[29px] w-6 h-6 bg-white border-4 border-orange-500 rounded-full z-10" />
                                             <div>
-                                                <p className="text-xs text-white/70">Customer</p>
-                                                <p className="text-sm font-medium">{activeDelivery.user?.name || "Customer"}</p>
-                                                <p className="text-xs text-white/90">{activeDelivery.address || "Address"}</p>
+                                                <h3 className="font-bold text-gray-900">{activeDelivery.restaurant?.name}</h3>
+                                                <p className="text-sm text-gray-500 mt-1">{activeDelivery.restaurant?.address || "Restaurant Address"}</p>
+                                                <div className="mt-3 flex gap-2">
+                                                    <button className="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 rounded-lg text-xs font-semibold text-gray-700 transition-colors">
+                                                        Call Restaurant
+                                                    </button>
+                                                    <button className="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 rounded-lg text-xs font-semibold text-gray-700 transition-colors">
+                                                        Navigate
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {/* Customer Point */}
+                                        <div className="relative">
+                                            <div className="absolute -left-[29px] w-6 h-6 bg-gray-900 rounded-full z-10 flex items-center justify-center">
+                                                <MapPin size={12} className="text-white" />
+                                            </div>
+                                            <div>
+                                                <h3 className="font-bold text-gray-900">{activeDelivery.user?.name}</h3>
+                                                <p className="text-sm text-gray-500 mt-1">{activeDelivery.address}</p>
+                                                <div className="mt-3 flex gap-2">
+                                                    <button className="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 rounded-lg text-xs font-semibold text-gray-700 transition-colors">
+                                                        Call Customer
+                                                    </button>
+                                                    <button className="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 rounded-lg text-xs font-semibold text-gray-700 transition-colors">
+                                                        Navigate
+                                                    </button>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
-                                </div>
 
-                                <div className="flex flex-wrap gap-3">
-                                    {activeDelivery.orderStatus === "preparing" && (
-                                        <div className="flex-1 bg-white/20 text-white font-semibold py-3 px-4 rounded-xl flex items-center justify-center gap-2">
-                                            <Clock className="w-5 h-5 animate-pulse" />
-                                            Waiting for Restaurant...
-                                        </div>
-                                    )}
-
-                                    {activeDelivery.orderStatus === "ready" && (
-                                        <button
-                                            onClick={() => handleUpdateStatus(activeDelivery._id, "picked_up")}
-                                            disabled={actionLoading === activeDelivery._id}
-                                            className="flex-1 bg-white text-orange-600 font-semibold py-3 px-4 rounded-xl hover:bg-gray-100 transition-all flex items-center justify-center gap-2"
-                                        >
-                                            {actionLoading === activeDelivery._id ? (
-                                                <Loader2 className="w-5 h-5 animate-spin" />
-                                            ) : (
-                                                <>
-                                                    <Package className="w-5 h-5" />
-                                                    Pick Up Order
-                                                </>
-                                            )}
-                                        </button>
-                                    )}
-
-                                    {(activeDelivery.orderStatus === "picked_up" || activeDelivery.orderStatus === "on_the_way") && (
-                                        <button
-                                            onClick={() => handleUpdateStatus(activeDelivery._id, "delivered")}
-                                            disabled={actionLoading === activeDelivery._id}
-                                            className="flex-1 bg-white text-green-600 font-semibold py-3 px-4 rounded-xl hover:bg-gray-100 transition-all flex items-center justify-center gap-2"
-                                        >
-                                            {actionLoading === activeDelivery._id ? (
-                                                <Loader2 className="w-5 h-5 animate-spin" />
-                                            ) : (
-                                                <>
-                                                    <CheckCircle className="w-5 h-5" />
-                                                    Complete Delivery
-                                                </>
-                                            )}
-                                        </button>
-                                    )}
-                                </div>
-                            </div>
-                        )}
-
-                        <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100">
-                            <div className="flex items-center justify-between mb-6">
-                                <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
-                                    <Package className="w-6 h-6 text-orange-500" />
-                                    Available Orders
-                                </h2>
-                                {availableOrders.length > 0 && (
-                                    <span className="notification-badge">{availableOrders.length}</span>
-                                )}
-                            </div>
-
-                            {availableOrders.length === 0 ? (
-                                <div className="text-center py-12">
-                                    <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                                        <Package className="w-8 h-8 text-gray-400" />
+                                    {/* Action Button */}
+                                    <div className="pt-6 border-t border-gray-100">
+                                        {activeDelivery.orderStatus === "ready" && (
+                                            <button
+                                                onClick={() => handleUpdateStatus(activeDelivery._id, "picked_up")}
+                                                disabled={actionLoading === activeDelivery._id}
+                                                className="w-full bg-orange-600 text-white font-bold py-4 rounded-xl hover:bg-orange-700 transition-all shadow-lg shadow-orange-200 flex items-center justify-center gap-2"
+                                            >
+                                                {actionLoading === activeDelivery._id ? <Loader2 className="animate-spin" /> : "Confirm Pickup"}
+                                            </button>
+                                        )}
+                                        {(activeDelivery.orderStatus === "picked_up" || activeDelivery.orderStatus === "on_the_way") && (
+                                            <button
+                                                onClick={() => handleUpdateStatus(activeDelivery._id, "delivered")}
+                                                disabled={actionLoading === activeDelivery._id}
+                                                className="w-full bg-green-600 text-white font-bold py-4 rounded-xl hover:bg-green-700 transition-all shadow-lg shadow-green-200 flex items-center justify-center gap-2"
+                                            >
+                                                {actionLoading === activeDelivery._id ? <Loader2 className="animate-spin" /> : "Complete Delivery"}
+                                            </button>
+                                        )}
+                                        {activeDelivery.orderStatus === "preparing" && (
+                                            <div className="w-full bg-gray-100 text-gray-500 font-bold py-4 rounded-xl flex items-center justify-center gap-2 cursor-not-allowed">
+                                                <Clock size={20} />
+                                                Food is being prepared...
+                                            </div>
+                                        )}
                                     </div>
-                                    <h3 className="text-lg font-medium text-gray-900 mb-2">No orders available</h3>
-                                    <p className="text-gray-500">New orders will appear here when restaurants prepare them</p>
                                 </div>
-                            ) : (
-                                <div className="space-y-4">
-                                    {availableOrders.map((order, index) => (
-                                        <div
-                                            key={order._id}
-                                            className="border border-gray-200 rounded-xl p-4 hover:border-orange-300 hover:shadow-md transition-all animate-slide-up"
-                                            style={{ animationDelay: `${index * 0.1}s` }}
-                                        >
-                                            <div className="flex justify-between items-start mb-3">
-                                                <div className="flex-1">
-                                                    <h3 className="font-bold text-lg text-gray-900">{order.restaurant?.name || "Restaurant"}</h3>
-                                                    <p className="text-sm text-gray-500">Order #{order._id.slice(-6).toUpperCase()}</p>
-                                                </div>
-                                                <div className="text-right">
-                                                    <p className="font-bold text-green-600 text-lg">+ ₹40.00</p>
-                                                    <p className="text-xs text-gray-500">delivery fee</p>
-                                                </div>
-                                            </div>
+                            </div>
+                        ) : (
+                            /* Available Orders List */
+                            <div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
+                                <div className="p-6 border-b border-gray-100 flex justify-between items-center">
+                                    <h2 className="text-lg font-bold text-gray-900">New Orders</h2>
+                                    <span className="bg-orange-100 text-orange-700 px-3 py-1 rounded-full text-xs font-bold">
+                                        {availableOrders.length} Available
+                                    </span>
+                                </div>
 
-                                            <div className="flex items-start gap-2 mb-4 text-sm">
-                                                <MapPin className="w-4 h-4 text-gray-400 mt-0.5 flex-shrink-0" />
-                                                <div>
-                                                    <p className="text-gray-600">{order.user?.name || "Customer"}</p>
-                                                    <p className="text-gray-500 text-xs">{order.address || "Address not provided"}</p>
+                                {availableOrders.length === 0 ? (
+                                    <div className="p-12 text-center">
+                                        <div className="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                                            <Package className="w-10 h-10 text-gray-300" />
+                                        </div>
+                                        <h3 className="text-gray-900 font-bold mb-2">No orders right now</h3>
+                                        <p className="text-gray-500 text-sm">Stay online! New orders will appear here instantly.</p>
+                                    </div>
+                                ) : (
+                                    <div className="divide-y divide-gray-100">
+                                        {availableOrders.map((order) => (
+                                            <div key={order._id} className="p-6 hover:bg-gray-50 transition-colors">
+                                                <div className="flex justify-between items-start mb-4">
+                                                    <div className="flex items-center gap-3">
+                                                        <div className="w-10 h-10 bg-white border border-gray-200 rounded-lg flex items-center justify-center">
+                                                            <img src="/restaurant-placeholder.png" alt="Rest" className="w-6 h-6 object-contain opacity-50" />
+                                                        </div>
+                                                        <div>
+                                                            <h3 className="font-bold text-gray-900">{order.restaurant?.name}</h3>
+                                                            <p className="text-xs text-gray-500">2.5 km • 15 mins</p>
+                                                        </div>
+                                                    </div>
+                                                    <div className="text-right">
+                                                        <p className="font-bold text-gray-900 text-lg">₹45</p>
+                                                        <p className="text-xs text-green-600 font-medium">Earnings</p>
+                                                    </div>
                                                 </div>
-                                            </div>
 
-                                            <div className="flex gap-3">
+                                                <div className="flex items-center gap-2 mb-4">
+                                                    <div className="h-1 w-1 bg-gray-300 rounded-full" />
+                                                    <p className="text-sm text-gray-600 truncate flex-1">{order.address}</p>
+                                                </div>
+
                                                 <button
                                                     onClick={() => handleAcceptOrder(order._id)}
                                                     disabled={actionLoading === order._id}
-                                                    className="flex-1 bg-gradient-to-r from-orange-500 to-red-600 text-white font-semibold py-3 px-4 rounded-xl hover:shadow-lg transition-all flex items-center justify-center gap-2"
+                                                    className="w-full bg-black text-white font-bold py-3 rounded-xl hover:bg-gray-800 transition-all flex items-center justify-center gap-2"
                                                 >
-                                                    {actionLoading === order._id ? (
-                                                        <Loader2 className="w-5 h-5 animate-spin" />
-                                                    ) : (
-                                                        <>
-                                                            <CheckCircle className="w-5 h-5" />
-                                                            Accept
-                                                        </>
-                                                    )}
+                                                    {actionLoading === order._id ? <Loader2 className="animate-spin" /> : "Accept Order"}
                                                 </button>
                                             </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            )}
-                        </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                        )}
                     </div>
 
-                    <div className="lg:col-span-1">
-                        <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100 sticky top-24">
-                            <h2 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2">
-                                <Clock className="w-6 h-6 text-orange-500" />
-                                Recent Activity
-                            </h2>
-
-                            {recentActivity.length === 0 ? (
-                                <div className="text-center py-8">
-                                    <AlertCircle className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-                                    <p className="text-gray-500 text-sm">No recent deliveries</p>
-                                </div>
-                            ) : (
-                                <div className="space-y-3">
-                                    {recentActivity.map((order) => (
-                                        <div key={order._id} className="flex items-start gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors">
-                                            <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
-                                                <CheckCircle className="w-5 h-5 text-green-600" />
-                                            </div>
-                                            <div className="flex-1 min-w-0">
-                                                <p className="font-semibold text-sm text-gray-900 truncate">
-                                                    {order.restaurant?.name || order.restaurantName || "Restaurant"}
-                                                </p>
-                                                <p className="text-xs text-gray-500 truncate">{order.user?.name || order.customerName || "Customer"}</p>
-                                                <p className="text-xs text-green-600 font-semibold mt-1">+ ₹40.00</p>
-                                            </div>
-                                            <span className="text-xs text-gray-400 whitespace-nowrap">
-                                                {new Date(order.updatedAt).toLocaleDateString([], { month: 'short', day: 'numeric' })}
-                                            </span>
+                    {/* Sidebar Stats */}
+                    <div className="space-y-6">
+                        <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-6">
+                            <h2 className="font-bold text-gray-900 mb-4">Recent Activity</h2>
+                            <div className="space-y-4">
+                                {recentActivity.slice(0, 5).map((order) => (
+                                    <div key={order._id} className="flex items-center gap-3">
+                                        <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+                                            <CheckCircle size={14} className="text-green-600" />
                                         </div>
-                                    ))}
-                                </div>
-                            )}
+                                        <div className="flex-1">
+                                            <p className="text-sm font-medium text-gray-900 truncate">{order.restaurant?.name}</p>
+                                            <p className="text-xs text-gray-500">Delivered at {new Date(order.updatedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
+                                        </div>
+                                        <span className="text-sm font-bold text-gray-900">₹40</span>
+                                    </div>
+                                ))}
+                                {recentActivity.length === 0 && (
+                                    <p className="text-sm text-gray-500 text-center py-4">No recent deliveries</p>
+                                )}
+                            </div>
+                            <button className="w-full mt-4 py-2 text-sm font-semibold text-orange-600 hover:bg-orange-50 rounded-lg transition-colors">
+                                View Full History
+                            </button>
+                        </div>
 
-                            {recentActivity.length > 0 && (
-                                <button className="w-full mt-4 text-orange-600 font-semibold text-sm hover:text-orange-700 transition-colors">
-                                    View All History →
-                                </button>
-                            )}
+                        <div className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-3xl shadow-lg p-6 text-white relative overflow-hidden">
+                            <div className="absolute top-0 right-0 w-32 h-32 bg-white opacity-5 rounded-bl-full -mr-8 -mt-8" />
+                            <h2 className="font-bold text-lg mb-1">Weekly Goal</h2>
+                            <p className="text-gray-400 text-sm mb-4">You're doing great!</p>
+
+                            <div className="flex items-end gap-2 mb-2">
+                                <span className="text-3xl font-bold">{stats.weekDeliveries}</span>
+                                <span className="text-gray-400 mb-1">/ 100 orders</span>
+                            </div>
+
+                            <div className="h-2 bg-gray-700 rounded-full overflow-hidden mb-4">
+                                <div className="h-full bg-orange-500 w-3/4 rounded-full" />
+                            </div>
+
+                            <p className="text-xs text-gray-400">
+                                Complete 25 more orders to reach your weekly target and unlock a <span className="text-orange-400 font-bold">₹500 bonus</span>!
+                            </p>
                         </div>
                     </div>
                 </div>

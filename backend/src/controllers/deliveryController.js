@@ -99,7 +99,7 @@ export const getAssignedOrders = async (req, res) => {
     // 2. "on_the_way" or "out-for-delivery" orders assigned to THIS partner
     const orders = await Order.find({
       $or: [
-        { orderStatus: { $in: ["preparing", "ready"] } },
+        { orderStatus: { $in: ["accepted", "preparing", "ready"] } },
         {
           orderStatus: { $in: ["on_the_way", "out-for-delivery", "picked_up"] },
           deliveryPartner: partner._id
@@ -264,14 +264,15 @@ export const updateDeliveryStatus = async (req, res) => {
   }
 }
 
-// ✅ PUT /api/delivery/toggle/:partnerId
+// ✅ PUT /api/delivery/toggle/:userId
 export const toggleAvailability = async (req, res) => {
   try {
-    const { partnerId } = req.params
+    const { partnerId } = req.params // This is actually userId passed from frontend
     const { isAvailable } = req.body
 
-    const partner = await DeliveryPartner.findByIdAndUpdate(
-      partnerId,
+    // Find partner where user field matches the passed ID
+    const partner = await DeliveryPartner.findOneAndUpdate(
+      { user: partnerId },
       { isAvailable },
       { new: true }
     ).populate("user", "name")

@@ -3,6 +3,38 @@ import Cart from "../models/Cart.js";
 import Coupon from "../models/Coupon.js";
 import Restaurant from "../models/Restaurant.js";
 
+// Helper to check if restaurant is open
+const isRestaurantOpen = (restaurant) => {
+  if (!restaurant || !restaurant.operatingHours) return false;
+  if (restaurant.isOpen === false) return false;
+
+  const { open, close, holidays } = restaurant.operatingHours;
+  if (!open || !close) return true;
+
+  // Use restaurant's timezone if possible, but for now assuming server time matches or is close enough
+  // Ideally, we should handle timezones. Assuming IST or server local time for MVP.
+  const now = new Date();
+  const currentDay = now.toLocaleDateString('en-US', { weekday: 'long' });
+
+  if (holidays && holidays.includes(currentDay)) return false;
+
+  const [openHour, openMinute] = open.split(':').map(Number);
+  const [closeHour, closeMinute] = close.split(':').map(Number);
+
+  const currentHour = now.getHours();
+  const currentMinute = now.getMinutes();
+
+  const currentTimeValue = currentHour * 60 + currentMinute;
+  const openTimeValue = openHour * 60 + openMinute;
+  const closeTimeValue = closeHour * 60 + closeMinute;
+
+  if (closeTimeValue < openTimeValue) {
+    return currentTimeValue >= openTimeValue || currentTimeValue <= closeTimeValue;
+  }
+
+  return currentTimeValue >= openTimeValue && currentTimeValue <= closeTimeValue;
+};
+
 // ✅ Create Order (from checkout - supports coupons)
 export const createOrder = async (req, res) => {
   try {
@@ -12,7 +44,11 @@ export const createOrder = async (req, res) => {
     const restaurantDoc = await Restaurant.findById(restaurant);
     if (!restaurantDoc) return res.status(404).json({ message: "Restaurant not found" });
     if (restaurantDoc.status !== "approved") return res.status(400).json({ message: "Restaurant is not currently active" });
-    if (!restaurantDoc.isOpen) return res.status(400).json({ message: "Restaurant is currently closed" });
+
+    // Check operating hours
+    if (!isRestaurantOpen(restaurantDoc)) {
+      return res.status(400).json({ message: "Restaurant is currently closed" });
+    }
 
     // ✅ Validation 2: Check Items Stock
     for (const item of items) {
@@ -130,7 +166,11 @@ export const placeOrder = async (req, res) => {
     const restaurantDoc = await Restaurant.findById(restaurant);
     if (!restaurantDoc) return res.status(404).json({ message: "Restaurant not found" });
     if (restaurantDoc.status !== "approved") return res.status(400).json({ message: "Restaurant is not currently active" });
-    if (!restaurantDoc.isOpen) return res.status(400).json({ message: "Restaurant is currently closed" });
+
+    // Check operating hours
+    if (!isRestaurantOpen(restaurantDoc)) {
+      return res.status(400).json({ message: "Restaurant is currently closed" });
+    }
 
     // ✅ Validation 2: Check Delivery Partner Availability
     const availablePartners = await import("../models/DeliveryPartner.js").then(m => m.default.countDocuments({ isAvailable: true }));
@@ -193,6 +233,8 @@ export const placeOrder = async (req, res) => {
         menuItem: i.menuItem._id,
         quantity: i.quantity,
         price: i.menuItem.price,
+        selectedVariant: i.selectedVariant,
+        selectedAddOns: i.selectedAddOns
       })),
       subtotal,
       discount: Math.round(discount),
@@ -224,7 +266,7 @@ export const placeOrder = async (req, res) => {
 export const getMyOrders = async (req, res) => {
   try {
     const orders = await Order.find({ user: req.user._id })
-      .populate("restaurant", "name")
+      .populate("restaurant", "name image") // ✅ Added image
       .populate("items.menuItem", "name price image");
 
     res.json(orders);
@@ -331,6 +373,17 @@ export const updateOrderStatus = async (req, res) => {
       import("../services/dispatchService.js").then(({ autoAssignOrder }) => {
         autoAssignOrder(order._id);
       });
+
+      // ✅ Notify Delivery Partners
+      if (global.io) {
+        global.io.to('delivery-partners').emit('new-delivery-request', {
+          orderId: order._id,
+          restaurantName: order.restaurant?.name || "Restaurant",
+          address: order.address ? `${order.address.line1}, ${order.address.city}` : "Customer Address",
+          totalAmount: order.totalAmount
+        });
+        console.log("🔔 Emitted new-delivery-request to delivery-partners");
+      }
     }
 
     res.json(order);

@@ -17,7 +17,8 @@ export const CartProvider = ({ children }) => {
 
   const normalizeItems = (items = []) =>
     items.map((i) => ({
-      _id: i.menuItem?._id || i._id,
+      _id: i._id, // Use Cart Item ID (Unique)
+      menuItemId: i.menuItem?._id || i.menuItem, // Store MenuItem ID separately
       name: i.menuItem?.name || i.name,
       price: i.menuItem?.price || i.price,
       image: i.menuItem?.image,

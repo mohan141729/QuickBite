@@ -2,6 +2,7 @@ import React from "react"
 import { Star, Clock, MapPin, Tag } from "lucide-react"
 import { Link } from "react-router-dom"
 import FavoriteButton from "./FavoriteButton"
+import { isRestaurantOpen } from "../utils/timeUtils"
 
 const RestaurantCard = ({ restaurant }) => {
   return (
@@ -20,7 +21,7 @@ const RestaurantCard = ({ restaurant }) => {
 
         {/* Badges */}
         <div className="absolute top-3 left-3 flex flex-col gap-2">
-          {restaurant.isOpen ? (
+          {isRestaurantOpen(restaurant) ? (
             <span className="bg-white/90 backdrop-blur-sm text-green-700 text-xs font-bold px-2 py-1 rounded-md shadow-sm">
               OPEN NOW
             </span>

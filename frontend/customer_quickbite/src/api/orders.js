@@ -4,7 +4,7 @@ const API_URL = "/api/orders"
 
 // ✅ Create new order
 export const createOrder = async (orderData) => {
-  const { data } = await api.post(API_URL, orderData, { withCredentials: true })
+  const { data } = await api.post(`${API_URL}/create`, orderData, { withCredentials: true })
   return data
 }
 

@@ -9,6 +9,7 @@ import {
     Settings,
     Tag,
     Grid,
+    Gift,
 } from 'lucide-react';
 import { UserButton, useUser } from '@clerk/clerk-react';
 
@@ -23,6 +24,7 @@ const Sidebar = ({ isOpen, onClose }) => {
         { path: '/delivery-partners', icon: Bike, label: 'Delivery Partners' },
         { path: '/orders', icon: Package, label: 'Orders' },
         { path: '/categories', icon: Grid, label: 'Categories' },
+        { path: '/incentives', icon: Gift, label: 'Incentives' },
         { path: '/coupons', icon: Tag, label: 'Coupons' },
         { path: '/analytics', icon: BarChart3, label: 'Analytics' },
         { path: '/settings', icon: Settings, label: 'Settings' },

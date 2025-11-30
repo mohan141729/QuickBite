@@ -47,6 +47,77 @@ export const createMenuItem = async (req, res) => {
   }
 }
 
+// ✅ Bulk Create Menu Items
+export const bulkCreateMenuItems = async (req, res) => {
+  try {
+    const { restaurantId, items } = req.body; // items is an array of menu item objects
+
+    if (!Array.isArray(items) || items.length === 0) {
+      return res.status(400).json({ message: "Items array is required and cannot be empty" });
+    }
+
+    // Ensure restaurant exists
+    const restaurant = await Restaurant.findById(restaurantId);
+    if (!restaurant) return res.status(404).json({ message: "Restaurant not found" });
+
+    // Ensure owner/admin authorization
+    if (
+      restaurant.owner.toString() !== req.user._id.toString() &&
+      req.user.role !== "admin"
+    ) {
+      return res.status(403).json({ message: "Not authorized to add items" });
+    }
+
+    const createdItems = [];
+    const errors = [];
+
+    for (const itemData of items) {
+      try {
+        // Basic validation for required fields
+        if (!itemData.name || !itemData.price || !itemData.category) {
+          errors.push({ item: itemData, error: "Missing required fields (name, price, category)" });
+          continue;
+        }
+
+        const newItem = await MenuItem.create({
+          ...itemData,
+          restaurant: restaurantId,
+        });
+
+        restaurant.menu.push(newItem._id);
+        createdItems.push(newItem);
+
+        // Update categories if needed (simple check, no image update for bulk for now unless provided)
+        const categoryName = itemData.category;
+        const existingCategoryIndex = restaurant.categories.findIndex(c => c.name.toLowerCase() === categoryName.toLowerCase());
+
+        if (existingCategoryIndex === -1) {
+          // Add new category with default or provided image if any (assuming bulk might not have images easily)
+          restaurant.categories.push({ name: categoryName, image: itemData.categoryImage || "" });
+        } else if (itemData.categoryImage) {
+          // Update image if provided in bulk data
+          restaurant.categories[existingCategoryIndex].image = itemData.categoryImage;
+        }
+
+      } catch (err) {
+        errors.push({ item: itemData, error: err.message });
+      }
+    }
+
+    await restaurant.save();
+
+    res.status(201).json({
+      message: `Successfully added ${createdItems.length} items. ${errors.length} failed.`,
+      createdItems,
+      errors
+    });
+
+  } catch (error) {
+    console.error("Bulk create error:", error);
+    res.status(500).json({ message: error.message });
+  }
+};
+
 // ✅ Get all menu items for a restaurant (public)
 export const getMenuItemsByRestaurant = async (req, res) => {
   try {

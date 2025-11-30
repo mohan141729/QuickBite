@@ -1,5 +1,0 @@
-Starting DB Test...
-Trying to connect to: mongodb://127.0.0.1:27017/quickbite_db
-❌ Connection Failed!
-Error: connect ECONNREFUSED 127.0.0.1:27017
-Code: undefined

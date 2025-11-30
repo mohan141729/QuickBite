@@ -18,6 +18,7 @@ import Analytics from './pages/Analytics';
 import Settings from './pages/Settings';
 import Coupons from './pages/Coupons';
 import Categories from './pages/Categories';
+import IncentivesPage from './pages/IncentivesPage';
 
 // Layout wrapper for authenticated pages
 const AdminLayout = ({ children }) => {
@@ -176,6 +177,17 @@ function App() {
                         <ProtectedRoute>
                             <AdminLayout>
                                 <Categories />
+                            </AdminLayout>
+                        </ProtectedRoute>
+                    }
+                />
+
+                <Route
+                    path="/incentives"
+                    element={
+                        <ProtectedRoute>
+                            <AdminLayout>
+                                <IncentivesPage />
                             </AdminLayout>
                         </ProtectedRoute>
                     }
