@@ -57,7 +57,11 @@ export const clerkAuth = async (req, res, next) => {
                         'http://localhost:5177',
                         'https://admin.quickbite.in',
                         'https://partner.quickbite.in',
-                        'https://quickbite.in'
+                        'https://quickbite.in',
+                        'https://quick-bite-smoky.vercel.app',
+                        'https://restaurant-quickbite.vercel.app',
+                        'https://deliverypartners-quickbite.vercel.app',
+                        'https://admin-quickbite.vercel.app'
                     ]
                 });
                 console.log('✅ Clerk JWT verified! User:', claims.sub);
@@ -128,7 +132,11 @@ export const attemptAuth = async (req, res, next) => {
                             'http://localhost:5177',
                             'https://admin.quickbite.in',
                             'https://partner.quickbite.in',
-                            'https://quickbite.in'
+                            'https://quickbite.in',
+                            'https://quick-bite-smoky.vercel.app',
+                            'https://restaurant-quickbite.vercel.app',
+                            'https://deliverypartners-quickbite.vercel.app',
+                            'https://admin-quickbite.vercel.app'
                         ]
                     });
                 } catch (clerkError) {
