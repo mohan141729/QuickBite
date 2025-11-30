@@ -13,7 +13,7 @@ const App = () => (
 
     {/* Clerk Authentication Routes */}
     <Route path="/sign-in" element={<SignIn />} />
-    <Route path="/sign-up" element={<SignUp />} />
+    <Route path="/sign-up/*" element={<SignUp />} />
 
     {/* Protected Routes */}
     <Route
