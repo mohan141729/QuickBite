@@ -81,114 +81,117 @@ const Navbar = () => {
               />
             </div>
 
-            {/* Delivery Location */}
-            {user && (
-              <div className="relative hidden lg:block">
-                <button
-                  onClick={() => setShowDeliveryCard(!showDeliveryCard)}
-                  className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-100 transition"
-                >
-                  <MapPin className="w-4 h-4 text-[#FC8019]" />
-                  <div className="text-left leading-tight">
-                    <h1 className="font-medium text-sm text-gray-800">
-                      Deliver to
-                    </h1>
-                    <p className="text-xs text-gray-500 font-normal truncate w-24">
-                      {user?.address?.[0]?.city || "Select location"}
-                    </p>
-                  </div>
-                </button>
-
-                {showDeliveryCard && (
-                  <div className="absolute top-full right-0 mt-2 z-[200] animate-slide-down">
-                    <DeliveryLocationCard
-                      onClose={() => setShowDeliveryCard(false)}
-                    />
-                  </div>
-                )}
-              </div>
-            )}
-
-            {/* Right side menu */}
-            {user ? (
-              <>
-                {/* Orders */}
-                <Link
-                  to="/orders"
-                  className="hidden sm:block text-gray-800 font-medium px-3 py-2 rounded-lg hover:bg-gray-100 transition"
-                >
-                  My Orders
-                </Link>
-
-                {/* Cart */}
-                <CartDrawer />
-
-                {/* Profile Dropdown */}
-                <div className="relative" ref={menuRef}>
+            {/* Right Side Group */}
+            <div className="flex items-center gap-4">
+              {/* Delivery Location */}
+              {user && (
+                <div className="relative hidden lg:block">
                   <button
-                    onClick={() => setMenuOpen((prev) => !prev)}
-                    className="flex items-center gap-2 border border-[#FC8019] text-[#FC8019] font-medium px-3 py-2 rounded-lg hover:bg-[#FC8019] hover:text-white transition"
+                    onClick={() => setShowDeliveryCard(!showDeliveryCard)}
+                    className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-100 transition"
                   >
-                    <User className="w-4 h-4" />
-                    <span className="hidden sm:block">
-                      {user?.name?.split(" ")[0] || "Profile"}
-                    </span>
+                    <MapPin className="w-4 h-4 text-[#FC8019]" />
+                    <div className="text-left leading-tight">
+                      <h1 className="font-medium text-sm text-gray-800">
+                        Deliver to
+                      </h1>
+                      <p className="text-xs text-gray-500 font-normal truncate w-24">
+                        {user?.address?.[0]?.city || "Select location"}
+                      </p>
+                    </div>
                   </button>
 
-                  {menuOpen && (
-                    <div className="absolute right-0 mt-2 w-44 bg-white border border-gray-100 rounded-lg shadow-lg animate-fade-in">
-                      <button
-                        onClick={() => {
-                          setShowProfile(true)
-                          setMenuOpen(false)
-                        }}
-                        className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                      >
-                        View Profile
-                      </button>
-                      <Link
-                        to="/favorites"
-                        onClick={() => setMenuOpen(false)}
-                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                      >
-                        My Favorites
-                      </Link>
-                      <Link
-                        to="/orders"
-                        onClick={() => setMenuOpen(false)}
-                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                      >
-                        My Orders
-                      </Link>
-                      <Link
-                        to="/help"
-                        onClick={() => setMenuOpen(false)}
-                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                      >
-                        Help & Support
-                      </Link>
-                      <button
-                        onClick={handleLogout}
-                        className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50"
-                      >
-                        Logout
-                      </button>
+                  {showDeliveryCard && (
+                    <div className="absolute top-full right-0 mt-2 z-[200] animate-slide-down">
+                      <DeliveryLocationCard
+                        onClose={() => setShowDeliveryCard(false)}
+                      />
                     </div>
                   )}
                 </div>
-              </>
-            ) : (
-              <>
-                <CartDrawer />
-                <Link
-                  to="/login"
-                  className="flex items-center gap-2 text-[#FC8019] border border-[#FC8019] font-medium px-3 py-2 rounded-lg hover:bg-[#FC8019] hover:text-white transition"
-                >
-                  <User className="w-4 h-4" />
-                  <span className="hidden sm:block">Sign In</span>
-                </Link>
-              </>
-            )}
+              )}
+
+              {/* User Menu */}
+              {user ? (
+                <>
+                  {/* Orders */}
+                  <Link
+                    to="/orders"
+                    className="hidden sm:block text-gray-800 font-medium px-3 py-2 rounded-lg hover:bg-gray-100 transition"
+                  >
+                    My Orders
+                  </Link>
+
+                  {/* Cart */}
+                  <CartDrawer />
+
+                  {/* Profile Dropdown */}
+                  <div className="relative" ref={menuRef}>
+                    <button
+                      onClick={() => setMenuOpen((prev) => !prev)}
+                      className="flex items-center gap-2 border border-[#FC8019] text-[#FC8019] font-medium px-3 py-2 rounded-lg hover:bg-[#FC8019] hover:text-white transition"
+                    >
+                      <User className="w-4 h-4" />
+                      <span className="hidden sm:block">
+                        {user?.name?.split(" ")[0] || "Profile"}
+                      </span>
+                    </button>
+
+                    {menuOpen && (
+                      <div className="absolute right-0 mt-2 w-44 bg-white border border-gray-100 rounded-lg shadow-lg animate-fade-in">
+                        <button
+                          onClick={() => {
+                            setShowProfile(true)
+                            setMenuOpen(false)
+                          }}
+                          className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                        >
+                          View Profile
+                        </button>
+                        <Link
+                          to="/favorites"
+                          onClick={() => setMenuOpen(false)}
+                          className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                        >
+                          My Favorites
+                        </Link>
+                        <Link
+                          to="/orders"
+                          onClick={() => setMenuOpen(false)}
+                          className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                        >
+                          My Orders
+                        </Link>
+                        <Link
+                          to="/help"
+                          onClick={() => setMenuOpen(false)}
+                          className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                        >
+                          Help & Support
+                        </Link>
+                        <button
+                          onClick={handleLogout}
+                          className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50"
+                        >
+                          Logout
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </>
+              ) : (
+                <>
+                  <CartDrawer />
+                  <Link
+                    to="/login"
+                    className="flex items-center gap-2 text-[#FC8019] border border-[#FC8019] font-medium px-3 py-2 rounded-lg hover:bg-[#FC8019] hover:text-white transition"
+                  >
+                    <User className="w-4 h-4" />
+                    <span className="hidden sm:block">Sign In</span>
+                  </Link>
+                </>
+              )}
+            </div>
           </div>
         </div>
       </nav>
