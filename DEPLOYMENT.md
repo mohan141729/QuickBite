@@ -1,8 +1,27 @@
 # QuickBite Deployment Guide
 
-This guide outlines the steps to deploy the QuickBite frontend to Vercel and the backend to Render.
+This guide outlines the steps to deploy the QuickBite frontend to Vercel and the backend to Railway or Render.
 
-## 1. Backend Deployment (Render)
+## 1. Backend Deployment
+
+### Option A: Railway (Recommended)
+
+1.  **Create a Railway Account**: Go to [railway.app](https://railway.app) and sign up (GitHub login recommended).
+2.  **New Project**: Click "New Project" -> "Deploy from GitHub repo".
+3.  **Select Repository**: Choose `QuickBite`.
+4.  **Configure Service**:
+    *   **Root Directory**: Go to Settings -> Root Directory and set it to `/backend`.
+    *   **Build/Start Command**: Railway usually auto-detects `npm install` and `npm start` from `package.json`.
+5.  **Environment Variables**:
+    *   Go to the "Variables" tab.
+    *   Add all variables from your `backend/.env` file (MONGO_URI, JWT_SECRET, CLERK_ keys, etc.).
+    *   Set `NODE_ENV` to `production`.
+6.  **Generate Domain**:
+    *   Go to "Settings" -> "Networking".
+    *   Click "Generate Domain" to get a public URL (e.g., `quickbite-backend.up.railway.app`).
+7.  **Deploy**: It should deploy automatically.
+
+### Option B: Render
 
 1.  **Create a Render Account**: Go to [render.com](https://render.com) and sign up.
 2.  **New Web Service**: Click "New +" and select "Web Service".
@@ -35,7 +54,7 @@ You need to deploy each frontend application (`admin_quickbite`, `customer_quick
     *   **Root Directory**: Select the specific frontend folder (e.g., `frontend/admin_quickbite`).
 5.  **Environment Variables**:
     *   **Key**: `VITE_API_URL` (or `VITE_API_BASE_URL` for customer app)
-    *   **Value**: The Render backend URL you copied earlier (e.g., `https://quickbite-backend.onrender.com`).
+    *   **Value**: The backend URL you copied earlier (e.g., `https://quickbite-backend.up.railway.app` or `https://quickbite-backend.onrender.com`).
     *   *Note: `customer_quickbite` uses `VITE_API_BASE_URL`, others use `VITE_API_URL`.*
 6.  **Deploy**: Click "Deploy".
 
@@ -59,4 +78,4 @@ You need to deploy each frontend application (`admin_quickbite`, `customer_quick
 
 ## 3. Post-Deployment
 
-*   **Update CORS**: After deploying frontends, go back to your Render backend dashboard -> Environment Variables. Update `ALLOWED_ORIGINS` (if you use it) or check `server.js` to ensure the new Vercel domains are allowed in CORS settings. You might need to add the Vercel domains to the `allowedOrigins` array in `backend/src/server.js` and redeploy the backend.
+*   **Update CORS**: After deploying frontends, go back to your backend dashboard (Railway or Render) -> Environment Variables. Update `ALLOWED_ORIGINS` (if you use it) or check `server.js` to ensure the new Vercel domains are allowed in CORS settings. You might need to add the Vercel domains to the `allowedOrigins` array in `backend/src/server.js` and redeploy the backend.
