@@ -26,6 +26,18 @@ Four distinct web applications (Customer, Restaurant, Delivery, Admin) powered b
 - **Analytics**: Revenue charts and top-selling item reports.
 
 ### 2.3 Delivery App
+- **Job Board**: Real-time broadcasting of available delivery requests.
+- **Active Delivery Flow**: Step-by-step navigation (Pickup -> Drop) with Google Maps.
+- **Earnings Wallet**: Instant balance updates after every delivery.
+
+### 2.4 Admin Dashboard
+- **User & Partner Management**: Approve restaurants/drivers and moderate content.
+- **Platform Config**: Set global fees, tax rates, and delivery parameters.
+
+---
+
+## 3. User Flows
+
 ### 3.1 Order Placement & Fulfillment
 This sequence demonstrates the lifecycle of an order from creation to delivery.
 
@@ -34,17 +46,7 @@ This sequence demonstrates the lifecycle of an order from creation to delivery.
 ### 3.2 Authentication Flow
 Secure login process using Clerk.
 
-```mermaid
-flowchart LR
-    User([User]) -->|Clicks Login| Frontend
-    Frontend -->|Redirects| Clerk[Clerk Hosted Page]
-    Clerk -->|Validates Creds| Clerk
-    Clerk -->|Returns Token| Frontend
-    Frontend -->|Sends Token| Backend
-    Backend -->|Verifies Token| DB[(Database)]
-    DB -->|User Data| Backend
-    Backend -->|Session Active| Frontend
-```
+![Authentication Flow](docs/images/auth_flow.png)
 
 ---
 
@@ -71,13 +73,13 @@ QuickBite uses a **Monorepo** structure where each frontend is a separate React 
 - **Optimized Bundles**: Each app loads only the libraries it needs (e.g., Recharts only in Dashboards).
 - **Shared Utilities**: Common logic (date formatting, validation) is shared via internal packages or utility folders.
 
-### 3.2 Backend Services
+### 4.7 Backend Services
 The backend is a monolithic Node.js/Express application, chosen for simplicity and speed of development, but structured for future microservices migration.
 - **Controllers**: Handle business logic.
 - **Services**: Encapsulate complex operations (e.g., `OrderService.createOrder`).
 - **Middleware**: Handle Auth (`clerkAuth`), Error Handling, and Validation.
 
-### 3.3 Real-Time Event Bus (Socket.io)
+### 4.8 Real-Time Event Bus (Socket.io)
 The heartbeat of QuickBite. It maintains persistent connections with all active clients.
 - **Rooms**:
     - `restaurant_{id}`: For sending orders to specific restaurants.
@@ -87,16 +89,16 @@ The heartbeat of QuickBite. It maintains persistent connections with all active 
     - `order:created` -> Emitted by API -> Received by Restaurant.
     - `order:status_change` -> Emitted by Restaurant/Driver -> Received by Customer.
 
-### 3.4 Database Design (MongoDB)
+### 4.9 Database Design (MongoDB)
 We use MongoDB for its flexible schema, perfect for storing varied menu structures and order logs.
 - **Geospatial Queries**: `2dsphere` indexes on Restaurant and User locations allow for efficient "Find restaurants near me" queries.
 - **ACID Transactions**: Used for critical operations like Order Creation to ensure inventory and payment consistency.
 
 ---
 
-## 4. API Reference
+## 5. API Reference
 
-### 4.1 Authentication (`/api/auth`)
+### 5.1 Authentication (`/api/auth`)
 #### `POST /webhook`
 - **Description**: Handles Clerk webhooks for user creation/update.
 - **Payload**:
@@ -119,7 +121,7 @@ We use MongoDB for its flexible schema, perfect for storing varied menu structur
   }
   ```
 
-### 4.2 User (`/api/user`)
+### 5.2 User (`/api/user`)
 #### `GET /profile`
 - **Description**: Fetches current user profile.
 - **Headers**: `Authorization: Bearer <backend_token>`
@@ -154,7 +156,7 @@ We use MongoDB for its flexible schema, perfect for storing varied menu structur
 - **Description**: Update order status.
 - **Body**: `{ "status": "preparing" }`
 
-### 4.5 Delivery (`/api/delivery`)
+### 5.3 Delivery (`/api/delivery`)
 #### `GET /available`
 - **Description**: List orders waiting for a driver.
 - **Response**: List of orders with status `ready`.
@@ -165,11 +167,11 @@ We use MongoDB for its flexible schema, perfect for storing varied menu structur
 
 ---
 
-## 5. Database Schema Reference
+## 6. Database Schema Reference
 
 ![ER Diagram](docs/images/er_diagram_comprehensive.png)
 
-### 5.1 User Model
+### 6.1 User Model
 | Field | Type | Required | Description |
 | :--- | :--- | :--- | :--- |
 | `clerkId` | String | Yes | Unique ID from Clerk Auth |
@@ -177,7 +179,7 @@ We use MongoDB for its flexible schema, perfect for storing varied menu structur
 | `role` | Enum | Yes | `customer`, `restaurant_owner`, `delivery_partner`, `admin` |
 | `addresses` | Array | No | List of saved addresses |
 
-### 5.2 Restaurant Model
+### 6.2 Restaurant Model
 | Field | Type | Required | Description |
 | :--- | :--- | :--- | :--- |
 | `owner` | ObjectId | Yes | Reference to User (Owner) |
@@ -186,7 +188,7 @@ We use MongoDB for its flexible schema, perfect for storing varied menu structur
 | `menu` | Array | No | List of MenuItem ObjectIds |
 | `isSurgeActive` | Boolean | No | Dynamic pricing flag |
 
-### 5.3 Order Model
+### 6.3 Order Model
 | Field | Type | Required | Description |
 | :--- | :--- | :--- | :--- |
 | `user` | ObjectId | Yes | Customer who placed order |
@@ -195,7 +197,7 @@ We use MongoDB for its flexible schema, perfect for storing varied menu structur
 | `status` | Enum | Yes | `pending`, `preparing`, `ready`, `out-for-delivery`, `delivered`, `cancelled` |
 | `totalAmount` | Number | Yes | Final bill amount |
 
-### 5.4 MenuItem Model
+### 6.4 MenuItem Model
 | Field | Type | Required | Description |
 | :--- | :--- | :--- | :--- |
 | `name` | String | Yes | Item Name |
@@ -205,22 +207,22 @@ We use MongoDB for its flexible schema, perfect for storing varied menu structur
 
 ---
 
-## 6. Codebase Walkthrough
+## 7. Codebase Walkthrough
 
-### 6.1 Key Directories
+### 7.1 Key Directories
 - **`backend/src/controllers`**: Contains the business logic. For example, `orderController.js` handles all order-related logic like validation, state transitions, and socket emissions.
 - **`backend/src/socket`**: `socket.js` initializes the Socket.io server and defines event listeners for `join-room` and `update-location`.
 - **`frontend/customer_quickbite/src/context`**: `AuthContext.jsx` manages the global user state using Clerk, while `CartContext.jsx` handles the shopping cart logic.
 
-### 6.2 Critical Files
+### 7.2 Critical Files
 - **`backend/src/middleware/clerkAuth.js`**: Custom middleware that verifies the Bearer token against Clerk's public key and attaches `req.auth.userId` to the request object.
 - **`frontend/delivery_quickbite/src/pages/ActiveDelivery.jsx`**: Complex component that handles the driver's workflow, integrating Google Maps for navigation and Socket.io for status updates.
 
 ---
 
-## 7. Deployment Guide
+## 8. Deployment Guide
 
-### 7.1 Backend (Render)
+### 8.1 Backend (Render)
 1.  Create a new Web Service on Render.
 2.  Connect your GitHub repository.
 3.  Set Build Command: `npm install`
@@ -228,7 +230,7 @@ We use MongoDB for its flexible schema, perfect for storing varied menu structur
 5.  Add Environment Variables (`MONGO_URI`, `CLERK_SECRET_KEY`, etc.).
 6.  Deploy!
 
-### 7.2 Frontend (Vercel)
+### 8.2 Frontend (Vercel)
 1.  Import the project into Vercel.
 2.  Select the specific root directory (e.g., `frontend/customer_quickbite`).
 3.  Vercel automatically detects Vite.
@@ -237,7 +239,7 @@ We use MongoDB for its flexible schema, perfect for storing varied menu structur
 
 ---
 
-## 8. Troubleshooting & FAQ
+## 9. Troubleshooting & FAQ
 
 ### Q: Why are images not loading?
 **A:** Ensure your Cloudinary credentials are correct in the backend `.env` file. Also, check if the image URL in the database is valid.
@@ -250,12 +252,12 @@ We use MongoDB for its flexible schema, perfect for storing varied menu structur
 
 ---
 
-## 9. Roadmap
+## 10. Roadmap
 - **Phase 2**: AI-powered recommendations based on order history.
 - **Phase 3**: Multi-language support for broader accessibility.
 - **Phase 4**: Driver live location tracking on a map for customers.
 
-## 10. Contributors
+## 11. Contributors
 - **Mohan** - Lead Developer & Architect
 
 
