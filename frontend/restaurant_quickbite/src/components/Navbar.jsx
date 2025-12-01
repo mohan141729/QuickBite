@@ -42,11 +42,7 @@ const Navbar = () => {
               to="/"
               className="flex items-center gap-2 group cursor-pointer"
             >
-              <div className="w-10 h-10 bg-gradient-to-r from-[#FC8019] to-[#E23744] rounded-xl flex items-center justify-center">
-                <span className="text-white font-extrabold text-xl tracking-tight">
-                  QB
-                </span>
-              </div>
+              <img src="/logo.png" alt="QuickBite" className="w-10 h-10 object-contain" />
               <div className="hidden sm:block leading-tight">
                 <h1 className="font-bold text-lg text-gray-900 group-hover:text-[#E23744] transition">
                   QuickBite Partner

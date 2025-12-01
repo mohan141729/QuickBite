@@ -39,9 +39,7 @@ const Navbar = () => {
           <div className="flex items-center justify-between h-20">
             {/* Logo */}
             <Link to="/" className="flex items-center gap-3 group">
-              <div className="w-10 h-10 bg-gradient-to-br from-orange-500 to-red-600 rounded-xl flex items-center justify-center shadow-lg shadow-orange-500/20 group-hover:shadow-orange-500/30 transition-all duration-300 transform group-hover:scale-105">
-                <span className="text-white font-bold text-xl tracking-tighter">QB</span>
-              </div>
+              <img src="/logo.png" alt="QuickBite" className="w-10 h-10 object-contain" />
               <div className="hidden sm:block">
                 <h1 className="font-bold text-xl text-gray-900 tracking-tight group-hover:text-orange-600 transition-colors">
                   QuickBite <span className="text-gray-400 font-medium text-sm ml-1">Partner</span>
