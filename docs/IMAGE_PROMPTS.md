@@ -106,3 +106,30 @@ Use these prompts to generate the diagrams for the Project Completion Document.
 > **Style:** Modern Cloud Architecture diagram. Clean, professional, distinct icons for each service (React, Node, Mongo, etc.). Arrows indicating data flow direction.
 
 **Recommended Filename:** `docs/images/system_architecture_v2.png`
+
+---
+
+## 8. Authentication Flow
+**Prompt:**
+> A detailed sequence diagram showing the 'Secure Authentication Flow' in QuickBite using Clerk.
+>
+> **Participants:**
+> 1.  **User**: The end-user.
+> 2.  **Frontend**: React Application.
+> 3.  **Clerk**: External Identity Provider (Auth).
+> 4.  **Backend**: Node.js API Server.
+> 5.  **Database**: MongoDB.
+>
+> **Sequence:**
+> 1.  **User** clicks 'Login' on **Frontend**.
+> 2.  **Frontend** redirects User to **Clerk** hosted login page.
+> 3.  **User** enters credentials (Email/Password or Google Auth).
+> 4.  **Clerk** validates credentials and redirects to **Frontend** with a Session Token.
+> 5.  **Frontend** attaches Token to API Request (Bearer Header) -> **Backend**.
+> 6.  **Backend** verifies Token signature using Clerk SDK.
+> 7.  **Backend** checks/creates User profile in **Database**.
+> 8.  **Backend** returns '200 OK' (Session Active).
+>
+> **Style:** Modern Sequence Diagram. distinct vertical lifelines. Use lock icons for security steps. Color scheme: Blue (Frontend), Purple (Clerk), Green (Backend). Professional and clean.
+
+**Recommended Filename:** `docs/images/auth_flow.png`
