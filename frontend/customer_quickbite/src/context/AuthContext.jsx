@@ -98,9 +98,9 @@ export const AuthProvider = ({ children }) => {
             });
 
             if (response.ok) {
-                const updatedUser = await response.json();
-                setDbUser(updatedUser);
-                return updatedUser;
+                const data = await response.json();
+                setDbUser(data.user);
+                return data;
             } else {
                 throw new Error('Failed to update profile');
             }
