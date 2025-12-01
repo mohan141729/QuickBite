@@ -90,6 +90,9 @@ const orderSchema = new mongoose.Schema(
 orderSchema.index({ user: 1 });
 orderSchema.index({ restaurant: 1 });
 orderSchema.index({ orderStatus: 1 });
+orderSchema.index({ createdAt: -1 }); // Index for sorting by date
+orderSchema.index({ restaurant: 1, createdAt: -1 }); // Compound index for restaurant orders
+orderSchema.index({ user: 1, createdAt: -1 }); // Compound index for user orders
 
 // ✅ Prevent OverwriteModelError on hot reloads
 export default mongoose.models.Order || mongoose.model("Order", orderSchema);

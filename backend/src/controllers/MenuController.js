@@ -137,7 +137,7 @@ export const getMenuItemsByRestaurant = async (req, res) => {
       return res.status(404).json({ message: "Restaurant not found or not approved" })
     }
 
-    const menuItems = await MenuItem.find({ restaurant: restaurantId })
+    const menuItems = await MenuItem.find({ restaurant: restaurantId }).lean()
     res.json(menuItems)
   } catch (error) {
     res.status(500).json({ message: error.message })
@@ -167,7 +167,7 @@ export const getAllMenuItems = async (req, res) => {
       ]
     }
 
-    const menuItems = await MenuItem.find(query).populate("restaurant", "name")
+    const menuItems = await MenuItem.find(query).populate("restaurant", "name").lean()
     res.status(200).json(menuItems)
   } catch (error) {
     res.status(500).json({ message: error.message })

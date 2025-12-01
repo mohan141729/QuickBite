@@ -7,6 +7,7 @@ const IncentiveCarousel = ({ stats }) => {
     const { user } = useAuth();
     const [incentives, setIncentives] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
     const [currentTime, setCurrentTime] = useState(new Date());
 
     useEffect(() => {
@@ -18,9 +19,11 @@ const IncentiveCarousel = ({ stats }) => {
         const fetchIncentives = async () => {
             try {
                 const response = await api.get("/api/incentives/active");
-                setIncentives(response.data.incentives);
+                setIncentives(response.data.incentives || []);
+                setError(null);
             } catch (error) {
                 console.error("Failed to fetch incentives:", error);
+                setError("Failed to load incentives");
             } finally {
                 setLoading(false);
             }
@@ -57,7 +60,31 @@ const IncentiveCarousel = ({ stats }) => {
         );
     }
 
-    if (incentives.length === 0) return null;
+    if (error) {
+        return (
+            <div className="mb-8 p-6 bg-red-50 rounded-2xl border border-red-100 text-center">
+                <p className="text-red-600 font-medium">{error}</p>
+                <button
+                    onClick={() => window.location.reload()}
+                    className="mt-2 text-sm text-red-700 underline hover:text-red-800"
+                >
+                    Retry
+                </button>
+            </div>
+        );
+    }
+
+    if (incentives.length === 0) {
+        return (
+            <div className="mb-8 p-8 bg-white rounded-2xl border border-gray-100 text-center shadow-sm">
+                <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <Award className="w-6 h-6 text-gray-400" />
+                </div>
+                <h3 className="text-gray-900 font-bold">No Active Incentives</h3>
+                <p className="text-gray-500 text-sm mt-1">Check back later for new earning opportunities!</p>
+            </div>
+        );
+    }
 
     return (
         <div className="mb-8 overflow-x-auto pb-4 hide-scrollbar">
@@ -69,7 +96,7 @@ const IncentiveCarousel = ({ stats }) => {
                     let progress = 0;
                     let current = 0;
 
-                    if (incentive.type === 'daily') {
+                    if (incentive.type === 'daily' || incentive.type === 'per_order') {
                         current = stats.todayDeliveries || 0;
                         progress = Math.min((current / incentive.target) * 100, 100);
                     } else if (incentive.type === 'weekly') {
@@ -105,7 +132,7 @@ const IncentiveCarousel = ({ stats }) => {
                                                 </span>
                                             )}
                                             <span className="bg-white/20 px-3 py-1 rounded-full text-xs font-bold backdrop-blur-sm border border-white/10">
-                                                {incentive.type === 'daily' ? 'TODAY' : 'WEEKLY'}
+                                                {incentive.type === 'weekly' ? 'WEEKLY' : 'TODAY'}
                                             </span>
                                         </div>
                                         {incentive.startTime && incentive.endTime && (

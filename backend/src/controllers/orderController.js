@@ -267,7 +267,8 @@ export const getMyOrders = async (req, res) => {
   try {
     const orders = await Order.find({ user: req.user._id })
       .populate("restaurant", "name image") // ✅ Added image
-      .populate("items.menuItem", "name price image");
+      .populate("items.menuItem", "name price image")
+      .lean();
 
     res.json(orders);
   } catch (error) {
@@ -305,7 +306,8 @@ export const getOrdersByRestaurant = async (req, res) => {
     const orders = await Order.find({ restaurant: restaurantId })
       .populate("user", "name email")
       .populate("items.menuItem", "name price image")
-      .sort({ createdAt: -1 }); // Added sort by newest
+      .sort({ createdAt: -1 }) // Added sort by newest
+      .lean();
 
     res.json({ success: true, orders });
   } catch (error) {
@@ -417,7 +419,8 @@ export const getAllOrders = async (req, res) => {
         populate: { path: "user", select: "name" }
       })
       .populate("items.menuItem", "name price")
-      .sort({ createdAt: -1 });
+      .sort({ createdAt: -1 })
+      .lean();
 
     if (pageSize > 0) {
       query = query.limit(pageSize).skip(skip);

@@ -3,22 +3,29 @@ import ProtectedRoute from './components/ProtectedRoute';
 import Sidebar from './components/Sidebar';
 import TopBar from './components/TopBar';
 import { useAuth, useUser } from '@clerk/clerk-react';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, lazy, Suspense } from 'react';
 import api from './api/axios';
 import { Toaster } from 'react-hot-toast';
 
-// Pages
-import SignInPage from './pages/SignInPage';
-import Dashboard from './pages/Dashboard';
-import Users from './pages/Users';
-import Restaurants from './pages/Restaurants';
-import DeliveryPartners from './pages/DeliveryPartners';
-import Orders from './pages/Orders';
-import Analytics from './pages/Analytics';
-import Settings from './pages/Settings';
-import Coupons from './pages/Coupons';
-import Categories from './pages/Categories';
-import IncentivesPage from './pages/IncentivesPage';
+// Lazy load pages
+const SignInPage = lazy(() => import('./pages/SignInPage'));
+const Dashboard = lazy(() => import('./pages/Dashboard'));
+const Users = lazy(() => import('./pages/Users'));
+const Restaurants = lazy(() => import('./pages/Restaurants'));
+const DeliveryPartners = lazy(() => import('./pages/DeliveryPartners'));
+const Orders = lazy(() => import('./pages/Orders'));
+const Analytics = lazy(() => import('./pages/Analytics'));
+const Settings = lazy(() => import('./pages/Settings'));
+const Coupons = lazy(() => import('./pages/Coupons'));
+const Categories = lazy(() => import('./pages/Categories'));
+const IncentivesPage = lazy(() => import('./pages/IncentivesPage'));
+
+// Loading Fallback
+const PageLoader = () => (
+    <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+    </div>
+);
 
 // Layout wrapper for authenticated pages
 const AdminLayout = ({ children }) => {
@@ -81,133 +88,133 @@ function App() {
     }, [isLoaded, user, getToken]);
 
     if (!isReady && user) {
-        return <div className="flex items-center justify-center min-h-screen">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
-        </div>;
+        return <PageLoader />;
     }
 
     return (
         <>
             <Toaster position="top-right" />
-            <Routes>
-                {/* Public Route */}
-                <Route path="/login" element={<SignInPage />} />
+            <Suspense fallback={<PageLoader />}>
+                <Routes>
+                    {/* Public Route */}
+                    <Route path="/login" element={<SignInPage />} />
 
-                {/* Protected Admin Routes */}
-                <Route
-                    path="/dashboard"
-                    element={
-                        <ProtectedRoute>
-                            <AdminLayout>
-                                <Dashboard />
-                            </AdminLayout>
-                        </ProtectedRoute>
-                    }
-                />
+                    {/* Protected Admin Routes */}
+                    <Route
+                        path="/dashboard"
+                        element={
+                            <ProtectedRoute>
+                                <AdminLayout>
+                                    <Dashboard />
+                                </AdminLayout>
+                            </ProtectedRoute>
+                        }
+                    />
 
-                <Route
-                    path="/users"
-                    element={
-                        <ProtectedRoute>
-                            <AdminLayout>
-                                <Users />
-                            </AdminLayout>
-                        </ProtectedRoute>
-                    }
-                />
+                    <Route
+                        path="/users"
+                        element={
+                            <ProtectedRoute>
+                                <AdminLayout>
+                                    <Users />
+                                </AdminLayout>
+                            </ProtectedRoute>
+                        }
+                    />
 
-                <Route
-                    path="/restaurants"
-                    element={
-                        <ProtectedRoute>
-                            <AdminLayout>
-                                <Restaurants />
-                            </AdminLayout>
-                        </ProtectedRoute>
-                    }
-                />
+                    <Route
+                        path="/restaurants"
+                        element={
+                            <ProtectedRoute>
+                                <AdminLayout>
+                                    <Restaurants />
+                                </AdminLayout>
+                            </ProtectedRoute>
+                        }
+                    />
 
-                <Route
-                    path="/delivery-partners"
-                    element={
-                        <ProtectedRoute>
-                            <AdminLayout>
-                                <DeliveryPartners />
-                            </AdminLayout>
-                        </ProtectedRoute>
-                    }
-                />
+                    <Route
+                        path="/delivery-partners"
+                        element={
+                            <ProtectedRoute>
+                                <AdminLayout>
+                                    <DeliveryPartners />
+                                </AdminLayout>
+                            </ProtectedRoute>
+                        }
+                    />
 
-                <Route
-                    path="/orders"
-                    element={
-                        <ProtectedRoute>
-                            <AdminLayout>
-                                <Orders />
-                            </AdminLayout>
-                        </ProtectedRoute>
-                    }
-                />
+                    <Route
+                        path="/orders"
+                        element={
+                            <ProtectedRoute>
+                                <AdminLayout>
+                                    <Orders />
+                                </AdminLayout>
+                            </ProtectedRoute>
+                        }
+                    />
 
-                <Route
-                    path="/analytics"
-                    element={
-                        <ProtectedRoute>
-                            <AdminLayout>
-                                <Analytics />
-                            </AdminLayout>
-                        </ProtectedRoute>
-                    }
-                />
+                    <Route
+                        path="/analytics"
+                        element={
+                            <ProtectedRoute>
+                                <AdminLayout>
+                                    <Analytics />
+                                </AdminLayout>
+                            </ProtectedRoute>
+                        }
+                    />
 
-                <Route
-                    path="/coupons"
-                    element={
-                        <ProtectedRoute>
-                            <AdminLayout>
-                                <Coupons />
-                            </AdminLayout>
-                        </ProtectedRoute>
-                    }
-                />
+                    <Route
+                        path="/coupons"
+                        element={
+                            <ProtectedRoute>
+                                <AdminLayout>
+                                    <Coupons />
+                                </AdminLayout>
+                            </ProtectedRoute>
+                        }
+                    />
 
-                <Route
-                    path="/categories"
-                    element={
-                        <ProtectedRoute>
-                            <AdminLayout>
-                                <Categories />
-                            </AdminLayout>
-                        </ProtectedRoute>
-                    }
-                />
+                    <Route
+                        path="/categories"
+                        element={
+                            <ProtectedRoute>
+                                <AdminLayout>
+                                    <Categories />
+                                </AdminLayout>
+                            </ProtectedRoute>
+                        }
+                    />
 
-                <Route
-                    path="/incentives"
-                    element={
-                        <ProtectedRoute>
-                            <AdminLayout>
-                                <IncentivesPage />
-                            </AdminLayout>
-                        </ProtectedRoute>
-                    }
-                />
+                    <Route
+                        path="/incentives"
+                        element={
+                            <ProtectedRoute>
+                                <AdminLayout>
+                                    <IncentivesPage />
+                                </AdminLayout>
+                            </ProtectedRoute>
+                        }
+                    />
 
-                <Route
-                    path="/settings"
-                    element={
-                        <ProtectedRoute>
-                            <AdminLayout>
-                                <Settings />
-                            </AdminLayout>
-                        </ProtectedRoute>
-                    }
-                />
+                    <Route
+                        path="/settings"
+                        element={
+                            <ProtectedRoute>
+                                <AdminLayout>
+                                    <Settings />
+                                </AdminLayout>
+                            </ProtectedRoute>
+                        }
+                    />
 
-                {/* Default Redirect */}
-                <Route path="/" element={<Navigate to="/dashboard" replace />} />
-                <Route path="*" element={<Navigate to="/dashboard" replace />} />
-            </Routes>
+                    {/* Default Redirect */}
+                    <Route path="/" element={<Navigate to="/dashboard" replace />} />
+                    <Route path="*" element={<Navigate to="/dashboard" replace />} />
+                </Routes>
+            </Suspense>
         </>
     );
 }

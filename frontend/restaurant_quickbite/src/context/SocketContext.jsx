@@ -29,7 +29,7 @@ export const SocketProvider = ({ children }) => {
         }
 
         // ✅ Initialize Socket.IO connection
-        const newSocket = io('http://localhost:5001', {
+        const newSocket = io(import.meta.env.VITE_API_URL || 'http://localhost:5001', {
             withCredentials: true,
             transports: ['websocket', 'polling'],
         });

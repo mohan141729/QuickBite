@@ -11,8 +11,8 @@ import DeliveryPartner from "../models/DeliveryPartner.js";
 // @access  Private/Admin
 export const getDashboardStats = async (req, res) => {
   try {
-    const totalUsers = await User.countDocuments();
-    const totalOrders = await Order.countDocuments();
+    const totalUsers = await User.estimatedDocumentCount();
+    const totalOrders = await Order.estimatedDocumentCount();
     const totalRestaurants = await Restaurant.countDocuments();
 
     const revenueResult = await Order.aggregate([
