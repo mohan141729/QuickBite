@@ -79,12 +79,15 @@ const IncentiveCarousel = ({ stats }) => {
 
                     // Dynamically select icon if needed, or default to Gift
                     const Icon = Gift;
-                    const gradientColor = incentive.color || "from-orange-500 to-red-600";
+
+                    // Robust check: Ensure color is a valid gradient string, otherwise fallback
+                    const hasValidGradient = incentive.color && incentive.color.includes('from-');
+                    const gradientColor = hasValidGradient ? incentive.color : "from-orange-500 to-red-600";
 
                     return (
                         <div
                             key={incentive._id}
-                            className={`w-80 p-5 rounded-2xl bg-gradient-to-br ${gradientColor} text-white shadow-lg transform transition-all hover:scale-[1.02] active:scale-95 relative overflow-hidden ${!isActiveNow ? 'opacity-60 grayscale-[0.5]' : ''}`}
+                            className={`w-80 p-5 rounded-2xl bg-orange-500 bg-gradient-to-br ${gradientColor} text-white shadow-lg transform transition-all hover:scale-[1.02] active:scale-95 relative overflow-hidden ${!isActiveNow ? 'opacity-60 grayscale-[0.5]' : ''}`}
                         >
                             {/* Background Pattern */}
                             <div className="absolute top-0 right-0 w-32 h-32 bg-white opacity-10 rounded-bl-full -mr-8 -mt-8" />
