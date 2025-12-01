@@ -11,6 +11,14 @@ QuickBite unifies the food delivery ecosystem into a single, real-time platform.
 ### 1.2 Scope
 Four distinct web applications (Customer, Restaurant, Delivery, Admin) powered by a centralized API and MongoDB.
 
+### 1.3 Brand Identity
+![QuickBite Logo](docs/images/logo.png)
+
+The **QuickBite** logo was designed to embody the core values of the platform: **Speed, Freshness, and Satisfaction**.
+- **The Bite Mark**: Represents the immediate gratification of a delicious meal.
+- **Vibrant Orange & Red**: Chosen to stimulate appetite and convey energy and urgency.
+- **Minimalist Design**: Ensures high visibility and recognition across all devices, from mobile app icons to desktop dashboards.
+
 ---
 
 ## 2. Key Features
