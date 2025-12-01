@@ -2,34 +2,31 @@ import React from 'react';
 
 const LoadingScreen = () => {
     return (
-        <div className="fixed inset-0 bg-white z-[9999] flex flex-col items-center justify-center">
-            <div className="relative">
-                {/* Pulse Effect */}
-                <div className="absolute inset-0 bg-orange-100 rounded-full animate-ping opacity-75"></div>
-
-                {/* Logo Container */}
-                <div className="relative w-24 h-24 bg-white rounded-full shadow-lg flex items-center justify-center animate-bounce-slight">
+        <div className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-gradient-to-br from-orange-500 to-red-600">
+            <div className="relative flex flex-col items-center">
+                {/* Logo Container with Breathing Effect */}
+                <div className="w-28 h-28 bg-white rounded-2xl shadow-2xl flex items-center justify-center animate-breathe mb-8">
                     <img
                         src="/logo.png"
                         alt="QuickBite"
-                        className="w-16 h-16 object-contain"
+                        className="w-20 h-20 object-contain"
                     />
                 </div>
-            </div>
 
-            {/* Text */}
-            <div className="mt-8 flex flex-col items-center">
-                <h1 className="text-2xl font-bold text-gray-800 tracking-tight">
+                {/* Text with Fade In */}
+                <h1 className="text-3xl font-extrabold text-white tracking-tight animate-fade-in-up">
                     QuickBite
                 </h1>
-                <p className="text-sm text-gray-500 mt-2 animate-pulse">
-                    Fast. Fresh. Delivered.
+                <p className="text-orange-100 mt-2 text-sm font-medium tracking-wide animate-fade-in-up delay-100">
+                    Your Cravings, Delivered Fast.
                 </p>
-            </div>
 
-            {/* Progress Bar */}
-            <div className="mt-8 w-48 h-1 bg-gray-100 rounded-full overflow-hidden">
-                <div className="h-full bg-gradient-to-r from-orange-500 to-red-600 animate-loading-bar"></div>
+                {/* Custom Loader Dots */}
+                <div className="flex gap-2 mt-8">
+                    <div className="w-2 h-2 bg-white rounded-full animate-bounce delay-0"></div>
+                    <div className="w-2 h-2 bg-white rounded-full animate-bounce delay-100"></div>
+                    <div className="w-2 h-2 bg-white rounded-full animate-bounce delay-200"></div>
+                </div>
             </div>
         </div>
     );
