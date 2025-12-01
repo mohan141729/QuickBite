@@ -1,5 +1,5 @@
 import { Routes, Route, Navigate } from "react-router-dom"
-import { lazy, Suspense } from "react"
+import { lazy, Suspense, useState, useEffect } from "react"
 import ProtectedRoute from "./components/ProtectedRoute"
 import SupportButton from "./components/SupportButton"
 import LoadingScreen from "./components/LoadingScreen"
@@ -18,6 +18,20 @@ const HelpPage = lazy(() => import("./pages/HelpPage"))
 const FAQPage = lazy(() => import("./pages/FAQPage"))
 
 const App = () => {
+  const [isLoading, setIsLoading] = useState(true)
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsLoading(false)
+    }, 10000)
+
+    return () => clearTimeout(timer)
+  }, [])
+
+  if (isLoading) {
+    return <LoadingScreen />
+  }
+
   return (
     <>
       <Suspense fallback={<LoadingScreen />}>
