@@ -2,7 +2,7 @@ import { Routes, Route, Navigate } from "react-router-dom"
 import { lazy, Suspense } from "react"
 import ProtectedRoute from "./components/ProtectedRoute"
 import SupportButton from "./components/SupportButton"
-import { Loader2 } from "lucide-react"
+import LoadingScreen from "./components/LoadingScreen"
 
 // Lazy load pages
 const HomePage = lazy(() => import("./pages/HomePage"))
@@ -17,16 +17,10 @@ const FavoritesPage = lazy(() => import("./pages/FavoritesPage"))
 const HelpPage = lazy(() => import("./pages/HelpPage"))
 const FAQPage = lazy(() => import("./pages/FAQPage"))
 
-const LoadingSpinner = () => (
-  <div className="min-h-screen flex items-center justify-center">
-    <Loader2 className="w-8 h-8 animate-spin text-orange-500" />
-  </div>
-)
-
 const App = () => {
   return (
     <>
-      <Suspense fallback={<LoadingSpinner />}>
+      <Suspense fallback={<LoadingScreen />}>
         <Routes>
           {/* Public Routes */}
           <Route path="/" element={<HomePage />} />

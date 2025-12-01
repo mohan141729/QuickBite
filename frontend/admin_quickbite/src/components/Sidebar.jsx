@@ -38,9 +38,7 @@ const Sidebar = ({ isOpen, onClose }) => {
             {/* Logo/Brand */}
             <div className="p-6 border-b border-white/10 flex items-center justify-between">
                 <Link to="/dashboard" className="flex items-center gap-3 group">
-                    <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-violet-600 rounded-xl flex items-center justify-center shadow-lg group-hover:shadow-indigo-500/30 transition-all duration-300">
-                        <span className="text-white font-bold text-xl">QB</span>
-                    </div>
+                    <img src="/logo.png" alt="QuickBite" className="w-10 h-10 object-contain" />
                     <div>
                         <h1 className="font-bold text-lg tracking-tight text-white">QuickBite</h1>
                         <p className="text-xs text-slate-400">Admin Panel</p>
