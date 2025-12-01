@@ -1,31 +1,21 @@
-import React, { Suspense, lazy } from "react"
 import { Routes, Route, Navigate } from "react-router-dom"
+import HomePage from "./pages/HomePage"
+import Restaurants from "./pages/Restaurants"
+import RestaurantPage from "./pages/RestaurantPage"
+import SignInPage from "./pages/auth/SignIn"
+import SignUpPage from "./pages/auth/SignUp"
+import CheckoutPage from "./pages/CheckoutPage"
+import OrderSuccess from "./pages/OrderSuccess"
+import OrdersPage from "./pages/OrdersPage"
+import FavoritesPage from "./pages/FavoritesPage"
+import HelpPage from "./pages/HelpPage"
+import FAQPage from "./pages/FAQPage"
 import ProtectedRoute from "./components/ProtectedRoute"
 import SupportButton from "./components/SupportButton"
 
-// Lazy load pages
-const HomePage = lazy(() => import("./pages/HomePage"))
-const Restaurants = lazy(() => import("./pages/Restaurants"))
-const RestaurantPage = lazy(() => import("./pages/RestaurantPage"))
-const SignInPage = lazy(() => import("./pages/auth/SignIn"))
-const SignUpPage = lazy(() => import("./pages/auth/SignUp"))
-const CheckoutPage = lazy(() => import("./pages/CheckoutPage"))
-const OrderSuccess = lazy(() => import("./pages/OrderSuccess"))
-const OrdersPage = lazy(() => import("./pages/OrdersPage"))
-const FavoritesPage = lazy(() => import("./pages/FavoritesPage"))
-const HelpPage = lazy(() => import("./pages/HelpPage"))
-const FAQPage = lazy(() => import("./pages/FAQPage"))
-
-// Loading Fallback
-const PageLoader = () => (
-  <div className="flex items-center justify-center min-h-screen">
-    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500"></div>
-  </div>
-)
-
 const App = () => {
   return (
-    <Suspense fallback={<PageLoader />}>
+    <>
       <Routes>
         {/* Public Routes */}
         <Route path="/" element={<HomePage />} />
@@ -71,7 +61,7 @@ const App = () => {
         <Route path="/faq" element={<FAQPage />} />
       </Routes>
       <SupportButton />
-    </Suspense>
+    </>
   )
 }
 
