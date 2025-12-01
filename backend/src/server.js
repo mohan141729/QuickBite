@@ -44,9 +44,7 @@ app.use(
     origin: (origin, callback) => {
       const allowedRegex = [
         /^https:\/\/.*\.vercel\.app$/,
-        /^https:\/\/.*\.onrender\.com$/,
-        /^https:\/\/.*\.up\.railway\.app$/,
-        /^https:\/\/.*\.railway\.app$/
+        /^https:\/\/.*\.onrender\.com$/
       ];
 
       if (
