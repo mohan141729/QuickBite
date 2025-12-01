@@ -24,7 +24,10 @@ import categoryRoutes from "./routes/categoryRoutes.js";
 import favoriteRoutes from "./routes/favoriteRoutes.js";
 import incentiveRoutes from "./routes/incentiveRoutes.js";
 
+import compression from "compression";
+
 const app = express();
+app.use(compression());
 const httpServer = createServer(app);
 
 const allowedOrigins = [

@@ -51,5 +51,7 @@ const restaurantSchema = new mongoose.Schema({
 
 // ✅ Add geospatial index for location-based search
 restaurantSchema.index({ "location": "2dsphere" });
+// ✅ Add index for owner lookups
+restaurantSchema.index({ owner: 1 });
 
 export default mongoose.models.Restaurant || mongoose.model("Restaurant", restaurantSchema);

@@ -53,5 +53,8 @@ const menuItemSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+// ✅ Add index for restaurant lookups
+menuItemSchema.index({ restaurant: 1 });
+
 // ✅ Prevent OverwriteModelError
 export default mongoose.models.MenuItem || mongoose.model("MenuItem", menuItemSchema);
