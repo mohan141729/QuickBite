@@ -72,6 +72,27 @@ const Restaurants = () => {
     setSearchParams(params);
   }, [filters, setSearchParams]);
 
+  // ✅ Sync filters with URL params when they change (e.g. from Navbar)
+  useEffect(() => {
+    const q = searchParams.get('q') || '';
+    const cuisine = searchParams.get('cuisine') || '';
+    const rating = searchParams.get('rating') || '';
+    const veg = searchParams.get('veg') || '';
+    const sort = searchParams.get('sort') || '';
+
+    // Only update if values differ to avoid infinite loops
+    if (
+      q !== filters.q ||
+      cuisine !== filters.cuisine ||
+      rating !== filters.rating ||
+      veg !== filters.veg ||
+      sort !== filters.sort
+    ) {
+      setFilters({ q, cuisine, rating, veg, sort });
+      setSearchQuery(q);
+    }
+  }, [searchParams]);
+
   const handleFilterChange = (newFilters) => {
     setFilters(newFilters);
   };
