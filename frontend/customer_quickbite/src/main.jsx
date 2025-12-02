@@ -4,7 +4,7 @@ import { BrowserRouter, useNavigate } from 'react-router-dom'
 import { ClerkProvider } from '@clerk/clerk-react'
 import './index.css'
 import App from './App.jsx'
-import { AuthProvider } from './context/AuthContext.jsx'
+import { AuthProvider, useAuth } from './context/AuthContext.jsx'
 import { CartProvider } from './context/CartContext.jsx'
 import { SocketProvider } from './context/SocketContext.jsx'
 import { FavoritesProvider } from './context/FavoritesContext.jsx'
@@ -14,6 +14,20 @@ const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY
 if (!PUBLISHABLE_KEY) {
   throw new Error("Missing Publishable Key")
 }
+
+const AppWithProviders = () => {
+  const { user } = useAuth();
+
+  return (
+    <SocketProvider user={user}>
+      <FavoritesProvider>
+        <CartProvider>
+          <App />
+        </CartProvider>
+      </FavoritesProvider>
+    </SocketProvider>
+  );
+};
 
 const ClerkProviderWithRoutes = () => {
   const navigate = useNavigate()
@@ -26,13 +40,7 @@ const ClerkProviderWithRoutes = () => {
       afterSignOutUrl="/"
     >
       <AuthProvider>
-        <SocketProvider>
-          <FavoritesProvider>
-            <CartProvider>
-              <App />
-            </CartProvider>
-          </FavoritesProvider>
-        </SocketProvider>
+        <AppWithProviders />
       </AuthProvider>
     </ClerkProvider>
   )

@@ -1,7 +1,5 @@
-/* eslint-disable react-refresh/only-export-components */
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { io } from 'socket.io-client';
-import { useAuth } from './AuthContext';
 
 const SocketContext = createContext(null);
 
@@ -13,10 +11,9 @@ export const useSocket = () => {
     return context;
 };
 
-export const SocketProvider = ({ children }) => {
+export const SocketProvider = ({ children, user }) => {
     const [socket, setSocket] = useState(null);
     const [isConnected, setIsConnected] = useState(false);
-    const { user } = useAuth();
 
     useEffect(() => {
         // Only connect if user is logged in
