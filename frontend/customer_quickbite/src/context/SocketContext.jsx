@@ -25,8 +25,9 @@ export const SocketProvider = ({ children, user }) => {
         }
 
         // ✅ Initialize Socket.IO connection
-        const socketUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5001';
-        const newSocket = io(socketUrl, {
+        // Strip '/api' from the base URL if present, as Socket.IO usually mounts at root
+        const baseUrl = (import.meta.env.VITE_API_BASE_URL || 'http://localhost:5001').replace(/\/api\/?$/, '');
+        const newSocket = io(baseUrl, {
             withCredentials: true,
         });
 

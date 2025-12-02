@@ -15,7 +15,9 @@ export const SocketProvider = ({ children }) => {
     useEffect(() => {
         if (user) {
             // Connect to backend
-            const newSocket = io(import.meta.env.VITE_API_URL || "http://localhost:5001", {
+            // Strip '/api' from the base URL if present
+            const baseUrl = (import.meta.env.VITE_API_URL || "http://localhost:5001").replace(/\/api\/?$/, '');
+            const newSocket = io(baseUrl, {
                 withCredentials: true,
             });
 
