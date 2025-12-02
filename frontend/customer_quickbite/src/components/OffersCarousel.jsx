@@ -52,7 +52,7 @@ const OffersCarousel = () => {
 
     return (
         <section
-            className="relative max-w-7xl mx-auto px-4 py-8"
+            className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12"
             onMouseEnter={() => setIsAutoPlaying(false)}
             onMouseLeave={() => setIsAutoPlaying(true)}
         >
@@ -163,8 +163,8 @@ const OffersCarousel = () => {
                             key={index}
                             onClick={() => setCurrentIndex(index)}
                             className={`h-2 rounded-full transition-all duration-300 ${index === currentIndex
-                                    ? "w-8 bg-[#FC8019]"
-                                    : "w-2 bg-gray-300 hover:bg-gray-400"
+                                ? "w-8 bg-[#FC8019]"
+                                : "w-2 bg-gray-300 hover:bg-gray-400"
                                 }`}
                             aria-label={`Go to offer ${index + 1}`}
                         />

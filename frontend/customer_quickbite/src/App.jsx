@@ -18,17 +18,9 @@ const HelpPage = lazy(() => import("./pages/HelpPage"))
 const FAQPage = lazy(() => import("./pages/FAQPage"))
 
 const App = () => {
-  const [isLoading, setIsLoading] = useState(true)
+  const { loading } = useAuth()
 
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsLoading(false)
-    }, 3000)
-
-    return () => clearTimeout(timer)
-  }, [])
-
-  if (isLoading) {
+  if (loading) {
     return <LoadingScreen />
   }
 

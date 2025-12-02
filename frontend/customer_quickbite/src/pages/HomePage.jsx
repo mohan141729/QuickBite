@@ -15,9 +15,7 @@ const HomePage = () => {
         <div className="min-h-screen w-full relative overflow-hidden bg-white">
             <Navbar />
 
-            <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-6">
-                <HeroSection />
-            </div>
+            <HeroSection />
 
             <OffersCarousel />
             <RecommendedRestaurants />

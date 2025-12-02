@@ -19,6 +19,7 @@ import Settings from './pages/Settings';
 import Coupons from './pages/Coupons';
 import Categories from './pages/Categories';
 import IncentivesPage from './pages/IncentivesPage';
+import LogoLoader from './components/LogoLoader';
 
 // Layout wrapper for authenticated pages
 const AdminLayout = ({ children }) => {
@@ -80,10 +81,9 @@ function App() {
         syncUser();
     }, [isLoaded, user, getToken]);
 
+
     if (!isReady && user) {
-        return <div className="flex items-center justify-center min-h-screen">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
-        </div>;
+        return <LogoLoader />;
     }
 
     return (

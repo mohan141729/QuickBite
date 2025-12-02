@@ -10,15 +10,18 @@ const LoginPage = lazy(() => import("./pages/LoginPage"));
 const RegisterPage = lazy(() => import("./pages/RegisterPage"));
 const History = lazy(() => import("./pages/History"));
 
-const LoadingSpinner = () => (
-  <div className="min-h-screen flex items-center justify-center">
-    <Loader2 className="w-8 h-8 animate-spin text-orange-500" />
-  </div>
-);
+import LogoLoader from "./components/LogoLoader";
+import { useAuth } from "./context/AuthContext";
 
 function App() {
+  const { loading } = useAuth();
+
+  if (loading) {
+    return <LogoLoader />;
+  }
+
   return (
-    <Suspense fallback={<LoadingSpinner />}>
+    <Suspense fallback={<LogoLoader />}>
       <Routes>
         <Route path="/" element={<LandingPage />} />
         <Route
