@@ -28,7 +28,6 @@ export const SocketProvider = ({ children, user }) => {
         const socketUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5001';
         const newSocket = io(socketUrl, {
             withCredentials: true,
-            transports: ['websocket', 'polling'],
         });
 
         // Connection events
