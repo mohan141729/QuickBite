@@ -17,7 +17,7 @@ const Navbar = () => {
 
   const handleSearch = (e) => {
     if (e.key === "Enter" && query.trim()) {
-      navigate(`/restaurants?search=${encodeURIComponent(query)}`)
+      navigate(`/restaurants?q=${encodeURIComponent(query)}`)
     }
   }
 
