@@ -13,7 +13,7 @@ const RestaurantCard = ({ restaurant }) => {
       {/* Image */}
       <div className="relative h-48 w-full overflow-hidden">
         <img
-          src={restaurant.image || "https://via.placeholder.com/300x200"}
+          src={restaurant.image || "https://placehold.co/300x200"}
           alt={restaurant.name}
           className="object-cover w-full h-full group-hover:scale-110 transition-transform duration-500"
         />

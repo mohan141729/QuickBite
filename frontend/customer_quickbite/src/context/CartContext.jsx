@@ -1,5 +1,6 @@
 
 import React, { createContext, useContext, useState, useEffect } from "react"
+import { useAuth } from "./AuthContext"
 import {
   fetchCart,
   addToCartAPI,
@@ -32,9 +33,16 @@ export const CartProvider = ({ children }) => {
         null,
     }))
 
+  const { user } = useAuth()
+
   // 🧭 Load cart on mount
   useEffect(() => {
     const loadCart = async () => {
+      if (!user) {
+        setCartItems([])
+        setTotal(0)
+        return
+      }
       try {
         setLoading(true)
         const data = await fetchCart()
@@ -48,7 +56,7 @@ export const CartProvider = ({ children }) => {
       }
     }
     loadCart()
-  }, [])
+  }, [user])
 
   // ➕ Add item
   const addToCart = async (menuItem, quantity = 1) => {
