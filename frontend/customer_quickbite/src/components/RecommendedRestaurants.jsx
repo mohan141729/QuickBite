@@ -26,7 +26,7 @@ const RecommendedRestaurants = () => {
     if (restaurants.length === 0) return null;
 
     return (
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-12">
             <h2 className="text-2xl font-bold mb-6 text-gray-800">Recommended for You</h2>
             <div className="flex overflow-x-auto pb-4 gap-6 scrollbar-hide">
                 {restaurants.map((restaurant) => (
@@ -39,7 +39,7 @@ const RecommendedRestaurants = () => {
                             />
                             <div className="absolute top-3 right-3 bg-white/90 backdrop-blur-sm px-2 py-1 rounded-lg flex items-center gap-1 shadow-sm">
                                 <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
-                                <span className="text-sm font-bold text-gray-800">{restaurant.rating || "New"}</span>
+                                <span className="text-sm font-bold text-gray-800">{restaurant.rating?.toFixed(1) || "New"}</span>
                             </div>
                         </div>
                         <div className="p-4">

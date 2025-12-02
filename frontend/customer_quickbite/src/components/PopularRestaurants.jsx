@@ -27,7 +27,7 @@ const PopularRestaurants = () => {
   }, [])
 
   return (
-    <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 bg-gray-50/50 rounded-3xl my-12">
+    <section className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-16 bg-gray-50/50 rounded-3xl my-12">
       <div className="flex items-end justify-between mb-10">
         <div>
           <div className="flex items-center gap-2 text-[#E23744] font-semibold mb-2">
@@ -41,7 +41,7 @@ const PopularRestaurants = () => {
 
         <Link
           to="/restaurants"
-          className="group flex items-center gap-2 text-[#FC8019] font-bold hover:text-[#E23744] transition-colors"
+          className="hidden md:flex group items-center gap-2 text-[#FC8019] font-bold hover:text-[#E23744] transition-colors"
         >
           <span>Explore All</span>
           <ArrowRight className="w-5 h-5 transform group-hover:translate-x-1 transition-transform" />
@@ -59,6 +59,17 @@ const PopularRestaurants = () => {
           ))}
         </div>
       )}
+
+      {/* Mobile Explore Button */}
+      <div className="mt-8 md:hidden">
+        <Link
+          to="/restaurants"
+          className="flex items-center justify-center gap-2 w-full bg-white border border-gray-200 text-[#FC8019] font-bold py-3 rounded-xl hover:bg-gray-50 transition-colors shadow-sm"
+        >
+          <span>Explore All Restaurants</span>
+          <ArrowRight className="w-5 h-5" />
+        </Link>
+      </div>
     </section>
   )
 }

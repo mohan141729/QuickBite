@@ -1,12 +1,21 @@
 import React, { useState } from 'react';
 import { X, Star, CheckCircle } from 'lucide-react';
 import StarRating from './StarRating';
+import api from '../api/api';
 
 const ReviewFormModal = ({ order, onClose, onSuccess }) => {
     const [rating, setRating] = useState(0);
+    const [itemRatings, setItemRatings] = useState({});
     const [comment, setComment] = useState('');
     const [loading, setLoading] = useState(false);
     const [submitted, setSubmitted] = useState(false);
+
+    const handleItemRatingChange = (itemId, value) => {
+        setItemRatings(prev => ({
+            ...prev,
+            [itemId]: value
+        }));
+    };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -16,29 +25,21 @@ const ReviewFormModal = ({ order, onClose, onSuccess }) => {
             return;
         }
 
-        if (!comment.trim()) {
-            alert('Please write a review');
-            return;
-        }
-
         setLoading(true);
         try {
-            const response = await fetch('/api/reviews', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                credentials: 'include',
-                body: JSON.stringify({
-                    restaurantId: order.restaurant._id || order.restaurant,
-                    orderId: order._id,
-                    rating,
-                    comment: comment.trim(),
-                }),
-            });
+            // Prepare items payload
+            const itemsPayload = Object.entries(itemRatings).map(([itemId, rating]) => ({
+                menuItem: itemId,
+                rating
+            }));
 
-            if (!response.ok) {
-                const error = await response.json();
-                throw new Error(error.message || 'Failed to submit review');
-            }
+            await api.post('/api/reviews', {
+                restaurantId: order.restaurant._id || order.restaurant,
+                orderId: order._id,
+                rating,
+                comment: comment.trim(),
+                items: itemsPayload
+            });
 
             setSubmitted(true);
             setTimeout(() => {
@@ -47,7 +48,7 @@ const ReviewFormModal = ({ order, onClose, onSuccess }) => {
             }, 2000);
         } catch (error) {
             console.error('Review submission error:', error);
-            alert(error.message || 'Failed to submit review');
+            alert(error.response?.data?.message || error.message || 'Failed to submit review');
         } finally {
             setLoading(false);
         }
@@ -94,7 +95,7 @@ const ReviewFormModal = ({ order, onClose, onSuccess }) => {
                     {/* Rating */}
                     <div className="mb-6">
                         <label className="block text-sm font-semibold text-gray-700 mb-3">
-                            Your Rating *
+                            Overall Rating *
                         </label>
                         <div className="flex items-center gap-3">
                             <StarRating value={rating} onChange={setRating} size="xl" />
@@ -105,6 +106,29 @@ const ReviewFormModal = ({ order, onClose, onSuccess }) => {
                             )}
                         </div>
                     </div>
+
+                    {/* Item Ratings */}
+                    {order.items && order.items.length > 0 && (
+                        <div className="mb-6 border-t border-b border-gray-100 py-4">
+                            <label className="block text-sm font-semibold text-gray-700 mb-3">
+                                Rate Items (Optional)
+                            </label>
+                            <div className="space-y-3">
+                                {order.items.map((item) => (
+                                    <div key={item.menuItem._id || item._id} className="flex items-center justify-between">
+                                        <span className="text-sm text-gray-600 truncate max-w-[150px]">
+                                            {item.menuItem?.name || item.name || "Item"}
+                                        </span>
+                                        <StarRating
+                                            value={itemRatings[item.menuItem._id || item.menuItem] || 0}
+                                            onChange={(val) => handleItemRatingChange(item.menuItem._id || item.menuItem, val)}
+                                            size="sm"
+                                        />
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
 
                     {/* Comment */}
                     <div className="mb-6">
@@ -135,7 +159,7 @@ const ReviewFormModal = ({ order, onClose, onSuccess }) => {
                         </button>
                         <button
                             type="submit"
-                            disabled={loading || rating === 0 || !comment.trim()}
+                            disabled={loading || rating === 0}
                             className="flex-1 px-6 py-3 bg-orange-500 text-white rounded-lg font-semibold hover:bg-orange-600 transition disabled:bg-gray-300 disabled:cursor-not-allowed"
                         >
                             {loading ? 'Submitting...' : 'Submit Review'}

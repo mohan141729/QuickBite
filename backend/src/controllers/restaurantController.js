@@ -1,5 +1,6 @@
 import Restaurant from "../models/Restaurant.js";
 import User from "../models/User.js";
+import MenuItem from "../models/MenuItem.js";
 
 // ✅ Create Restaurant
 export const createRestaurant = async (req, res) => {
@@ -83,45 +84,77 @@ export const searchAndFilterRestaurants = async (req, res) => {
   try {
     const { q, cuisine, rating, veg, sort, status = 'approved' } = req.query;
 
-    let query = { status }; // Only show approved restaurants by default
+    let restaurantQuery = { status }; // Only show approved restaurants by default
+    let dishQuery = { isAvailable: true }; // Only show available dishes
 
     // Text search
     if (q) {
       const searchRegex = new RegExp(q, "i");
-      query.$or = [
+
+      // Restaurant search criteria
+      restaurantQuery.$or = [
         { name: searchRegex },
         { cuisine: searchRegex },
         { description: searchRegex }
+      ];
+
+      // Dish search criteria
+      dishQuery.$or = [
+        { name: searchRegex },
+        { description: searchRegex },
+        { category: searchRegex },
+        { tags: searchRegex }
       ];
     }
 
     // Cuisine filter (can be comma-separated: "Italian,Chinese")
     if (cuisine) {
       const cuisines = cuisine.split(',').map(c => new RegExp(c.trim(), 'i'));
-      query.cuisine = { $in: cuisines };
+      restaurantQuery.cuisine = { $in: cuisines };
+      // For dishes, we might filter by category or tags if they match cuisine names
+      // But usually cuisine filter is for restaurants. We'll leave dishQuery untouched for cuisine for now
+      // unless we want to filter dishes belonging to those restaurants.
     }
 
     // Rating filter
     if (rating) {
-      query.rating = { $gte: parseFloat(rating) };
+      restaurantQuery.rating = { $gte: parseFloat(rating) };
+      dishQuery.rating = { $gte: parseFloat(rating) };
     }
 
-    // Veg-only filter (find restaurants with veg options)
-    // Note: This is a simplified approach. For more accuracy, you'd query menu items.
+    // Veg-only filter
     if (veg === 'true') {
-      query.isVeg = true; // Assuming you add this field to Restaurant model
+      restaurantQuery.isVeg = true;
+      dishQuery.isVeg = true;
     }
 
-    let restaurants = await Restaurant.find(query);
+    // Execute Restaurant Search
+    let restaurants = await Restaurant.find(restaurantQuery);
+
+    // Execute Dish Search (only if search query 'q' is present or specific dish filters are applied)
+    let dishes = [];
+    if (q || veg === 'true' || rating) {
+      dishes = await MenuItem.find(dishQuery)
+        .populate('restaurant', 'name image location isSurgeActive deliveryRadius')
+        .limit(20); // Limit results to avoid overwhelming response
+    }
 
     // Sorting
     if (sort === 'rating') {
       restaurants = restaurants.sort((a, b) => (b.rating || 0) - (a.rating || 0));
+      dishes = dishes.sort((a, b) => (b.rating || 0) - (a.rating || 0));
     } else if (sort === 'deliveryTime') {
       restaurants = restaurants.sort((a, b) => (a.avgDeliveryTime || 30) - (b.avgDeliveryTime || 30));
+    } else if (sort === 'price_low') {
+      dishes = dishes.sort((a, b) => a.price - b.price);
+    } else if (sort === 'price_high') {
+      dishes = dishes.sort((a, b) => b.price - a.price);
     }
 
-    res.json(restaurants);
+    res.json({
+      restaurants,
+      dishes
+    });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

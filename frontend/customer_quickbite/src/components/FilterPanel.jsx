@@ -20,121 +20,143 @@ const FilterPanel = ({ filters, onFilterChange, onClear }) => {
     return (
         <>
             {/* Mobile Filter Button */}
-            <button
-                onClick={() => setIsOpen(!isOpen)}
-                className="lg:hidden flex items-center gap-2 px-4 py-2 bg-white border rounded-lg shadow-sm"
-            >
-                <Filter className="w-4 h-4" />
-                Filters
+            {/* Mobile Filter Controls */}
+            <div className="lg:hidden flex items-center gap-3">
+                <button
+                    onClick={() => setIsOpen(!isOpen)}
+                    className="flex items-center gap-2 px-4 py-2 bg-white border rounded-lg shadow-sm font-medium text-gray-700"
+                >
+                    <Filter className="w-4 h-4" />
+                    Filters
+                    {Object.keys(filters).filter(k => filters[k]).length > 0 && (
+                        <span className="bg-orange-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                            {Object.keys(filters).filter(k => filters[k]).length}
+                        </span>
+                    )}
+                </button>
+
                 {Object.keys(filters).filter(k => filters[k]).length > 0 && (
-                    <span className="bg-orange-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                        {Object.keys(filters).filter(k => filters[k]).length}
-                    </span>
+                    <button
+                        onClick={onClear}
+                        className="px-4 py-2 bg-gray-100 text-gray-600 rounded-lg text-sm font-medium hover:bg-gray-200"
+                    >
+                        Clear
+                    </button>
                 )}
-            </button>
+            </div>
 
             {/* Filter Panel */}
-            <div className={`${isOpen ? 'fixed inset-0 z-50 lg:relative lg:block' : 'hidden lg:block'}`}>
+            <div className={`${isOpen ? 'fixed inset-0 z-[60] lg:relative lg:block' : 'hidden lg:block'}`}>
                 {/* Mobile Backdrop */}
                 {isOpen && (
                     <div className="lg:hidden fixed inset-0 bg-black/50" onClick={() => setIsOpen(false)} />
                 )}
 
                 {/* Filter Content */}
-                <div className={`${isOpen ? 'fixed right-0 top-0 h-full w-80 animate-slide-in-right' : 'relative'} bg-white lg:rounded-xl lg:shadow-sm lg:border border-gray-100 p-6 overflow-y-auto`}>
+                <div className={`${isOpen ? 'fixed right-0 top-0 h-full w-80 animate-slide-in-right flex flex-col' : 'relative'} bg-white lg:rounded-xl lg:shadow-sm lg:border border-gray-100 overflow-hidden`}>
+
                     {/* Header */}
-                    <div className="flex items-center justify-between mb-6">
+                    <div className="p-6 pb-4 border-b lg:border-none flex items-center justify-between flex-shrink-0">
                         <h3 className="font-bold text-lg flex items-center gap-2">
                             <Filter className="w-5 h-5" />
                             Filters
                         </h3>
-                        <div className="flex items-center gap-2">
+                        {isOpen && (
+                            <button onClick={() => setIsOpen(false)} className="lg:hidden p-2 hover:bg-gray-100 rounded-full">
+                                <X className="w-5 h-5" />
+                            </button>
+                        )}
+                        <button
+                            onClick={() => { onClear(); setIsOpen(false); }}
+                            className="hidden lg:block text-sm text-orange-600 hover:text-orange-700 font-medium"
+                        >
+                            Clear All
+                        </button>
+                    </div>
+
+                    {/* Scrollable Content */}
+                    <div className="flex-1 overflow-y-auto p-6 pt-2">
+                        {/* Sort */}
+                        <div className="mb-6">
+                            <label className="block text-sm font-semibold text-gray-700 mb-3">Sort By</label>
+                            <select
+                                value={filters.sort || ''}
+                                onChange={(e) => onFilterChange({ ...filters, sort: e.target.value || undefined })}
+                                className="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-orange-500 outline-none"
+                            >
+                                <option value="">Relevance</option>
+                                <option value="rating">Rating (High to Low)</option>
+                                <option value="deliveryTime">Delivery Time</option>
+                            </select>
+                        </div>
+
+                        {/* Rating */}
+                        <div className="mb-6">
+                            <label className="block text-sm font-semibold text-gray-700 mb-3">Rating</label>
+                            <div className="space-y-2">
+                                {['4.5', '4', '3.5'].map((rating) => (
+                                    <label key={rating} className="flex items-center gap-2 cursor-pointer">
+                                        <input
+                                            type="radio"
+                                            name="rating"
+                                            checked={filters.rating === rating}
+                                            onChange={() => onFilterChange({ ...filters, rating: filters.rating === rating ? undefined : rating })}
+                                            className="w-4 h-4 text-orange-500 focus:ring-orange-500"
+                                        />
+                                        <span className="text-sm text-gray-700">{rating}★ & above</span>
+                                    </label>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* Cuisine */}
+                        <div className="mb-6">
+                            <label className="block text-sm font-semibold text-gray-700 mb-3">Cuisine</label>
+                            <div className="space-y-2">
+                                {cuisines.map((cuisine) => (
+                                    <label key={cuisine} className="flex items-center gap-2 cursor-pointer">
+                                        <input
+                                            type="checkbox"
+                                            checked={selectedCuisines.includes(cuisine)}
+                                            onChange={() => handleCuisineToggle(cuisine)}
+                                            className="w-4 h-4 text-orange-500 rounded focus:ring-orange-500"
+                                        />
+                                        <span className="text-sm text-gray-700">{cuisine}</span>
+                                    </label>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* Veg Only */}
+                        <div className="mb-6">
+                            <label className="flex items-center gap-2 cursor-pointer">
+                                <input
+                                    type="checkbox"
+                                    checked={filters.veg === 'true'}
+                                    onChange={(e) => onFilterChange({ ...filters, veg: e.target.checked ? 'true' : undefined })}
+                                    className="w-4 h-4 text-green-600 rounded focus:ring-green-500"
+                                />
+                                <span className="text-sm font-semibold text-gray-700">Veg Only</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    {/* Mobile Footer (Sticky) */}
+                    {isOpen && (
+                        <div className="lg:hidden p-4 border-t bg-white flex gap-3 flex-shrink-0">
                             <button
                                 onClick={() => { onClear(); setIsOpen(false); }}
-                                className="text-sm text-orange-600 hover:text-orange-700 font-medium"
+                                className="flex-1 py-3 px-4 border border-gray-300 text-gray-700 font-semibold rounded-lg hover:bg-gray-50 transition"
                             >
                                 Clear All
                             </button>
-                            {isOpen && (
-                                <button onClick={() => setIsOpen(false)} className="lg:hidden">
-                                    <X className="w-5 h-5" />
-                                </button>
-                            )}
+                            <button
+                                onClick={() => setIsOpen(false)}
+                                className="flex-1 py-3 px-4 bg-orange-500 text-white font-semibold rounded-lg hover:bg-orange-600 transition"
+                            >
+                                Apply
+                            </button>
                         </div>
-                    </div>
-
-                    {/* Sort */}
-                    <div className="mb-6">
-                        <label className="block text-sm font-semibold text-gray-700 mb-3">Sort By</label>
-                        <select
-                            value={filters.sort || ''}
-                            onChange={(e) => onFilterChange({ ...filters, sort: e.target.value || undefined })}
-                            className="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-orange-500 outline-none"
-                        >
-                            <option value="">Relevance</option>
-                            <option value="rating">Rating (High to Low)</option>
-                            <option value="deliveryTime">Delivery Time</option>
-                        </select>
-                    </div>
-
-                    {/* Rating */}
-                    <div className="mb-6">
-                        <label className="block text-sm font-semibold text-gray-700 mb-3">Rating</label>
-                        <div className="space-y-2">
-                            {['4.5', '4', '3.5'].map((rating) => (
-                                <label key={rating} className="flex items-center gap-2 cursor-pointer">
-                                    <input
-                                        type="radio"
-                                        name="rating"
-                                        checked={filters.rating === rating}
-                                        onChange={() => onFilterChange({ ...filters, rating: filters.rating === rating ? undefined : rating })}
-                                        className="w-4 h-4 text-orange-500 focus:ring-orange-500"
-                                    />
-                                    <span className="text-sm text-gray-700">{rating}★ & above</span>
-                                </label>
-                            ))}
-                        </div>
-                    </div>
-
-                    {/* Cuisine */}
-                    <div className="mb-6">
-                        <label className="block text-sm font-semibold text-gray-700 mb-3">Cuisine</label>
-                        <div className="space-y-2">
-                            {cuisines.map((cuisine) => (
-                                <label key={cuisine} className="flex items-center gap-2 cursor-pointer">
-                                    <input
-                                        type="checkbox"
-                                        checked={selectedCuisines.includes(cuisine)}
-                                        onChange={() => handleCuisineToggle(cuisine)}
-                                        className="w-4 h-4 text-orange-500 rounded focus:ring-orange-500"
-                                    />
-                                    <span className="text-sm text-gray-700">{cuisine}</span>
-                                </label>
-                            ))}
-                        </div>
-                    </div>
-
-                    {/* Veg Only */}
-                    <div className="mb-6">
-                        <label className="flex items-center gap-2 cursor-pointer">
-                            <input
-                                type="checkbox"
-                                checked={filters.veg === 'true'}
-                                onChange={(e) => onFilterChange({ ...filters, veg: e.target.checked ? 'true' : undefined })}
-                                className="w-4 h-4 text-green-600 rounded focus:ring-green-500"
-                            />
-                            <span className="text-sm font-semibold text-gray-700">Veg Only</span>
-                        </label>
-                    </div>
-
-                    {/* Mobile Apply Button */}
-                    {isOpen && (
-                        <button
-                            onClick={() => setIsOpen(false)}
-                            className="lg:hidden w-full bg-orange-500 text-white font-semibold py-3 rounded-lg hover:bg-orange-600 transition"
-                        >
-                            Apply Filters
-                        </button>
                     )}
                 </div>
             </div>

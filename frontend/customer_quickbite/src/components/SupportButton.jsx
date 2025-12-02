@@ -1,8 +1,13 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { MessageCircle } from 'lucide-react';
 
 const SupportButton = () => {
+    const location = useLocation();
+
+    // Hide support button on help page to prevent overlap
+    if (location.pathname === '/help') return null;
+
     return (
         <Link
             to="/help"

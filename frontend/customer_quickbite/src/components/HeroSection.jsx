@@ -10,21 +10,23 @@ const HeroSection = () => {
 
   const handleSearch = (e) => {
     if (e.key === "Enter" && query.trim()) {
-      navigate(`/restaurants?search=${encodeURIComponent(query)}`)
+      navigate(`/restaurants?q=${encodeURIComponent(query)}`)
     }
   }
 
   // Get greeting based on time of day
   // Get greeting based on time of day
+  // Get greeting based on time of day
   const getGreeting = () => {
     const hour = new Date().getHours()
-    if (hour < 12) return "Rise & Shine ☀️"
-    if (hour < 17) return "Good Afternoon 🌞"
-    return "Good Evening 🌙"
+    if (hour >= 5 && hour < 12) return "Rise & Shine ☀️"
+    if (hour >= 12 && hour < 17) return "Good Afternoon 🌞"
+    if (hour >= 17 && hour < 21) return "Good Evening 🌆"
+    return "Late Night Cravings? 🌙"
   }
 
   return (
-    <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-8 w-full">
+    <section className="max-w-full mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-8 w-full">
       <div className="relative h-[500px] md:h-[600px] w-full overflow-hidden rounded-2xl">
         {/* Video Background */}
         <video
@@ -44,7 +46,8 @@ const HeroSection = () => {
         </video>
 
         {/* Dark gradient overlay */}
-        <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/40 to-black/10"></div>
+        {/* Dark gradient overlay */}
+        <div className="absolute inset-0 bg-gradient-to-b from-black/90 via-black/50 to-transparent"></div>
 
         {/* Floating gradient orbs for subtle glow */}
 

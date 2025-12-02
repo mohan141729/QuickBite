@@ -116,7 +116,7 @@ const MenuItemCard = ({ item, disabled }) => {
             <div className="flex items-center gap-1">
               <Star className={`w-3 h-3 fill-yellow-400 text-yellow-400 ${!isAvailable ? 'opacity-40' : ''}`} />
               <span className={`text-xs font-medium ml-1 ${!isAvailable ? 'text-gray-300' : 'text-gray-400'}`}>
-                (120+ ratings)
+                {item.rating > 0 ? `${item.rating.toFixed(1)} (${item.ratingCount} ratings)` : "New"}
               </span>
             </div>
             {item.nutritionalInfo?.calories && (

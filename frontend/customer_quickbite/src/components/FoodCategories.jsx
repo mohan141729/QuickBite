@@ -74,7 +74,7 @@ const FoodCategories = () => {
   const scrollRight = () => scrollRef.current.scrollBy({ left: 300, behavior: "smooth" })
 
   return (
-    <section className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <section className="relative max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-16">
       {/* Header */}
       <div className="flex items-end justify-between mb-10">
         <div>

@@ -94,7 +94,6 @@ const ReviewSection = ({ restaurantId }) => {
                                 onChange={(e) => setComment(e.target.value)}
                                 placeholder="Share your experience..."
                                 className="w-full p-4 rounded-xl border border-gray-200 focus:ring-2 focus:ring-orange-100 focus:border-[#FC8019] outline-none resize-none h-28 text-gray-700 bg-white"
-                                required
                             />
                             <button
                                 type="submit"

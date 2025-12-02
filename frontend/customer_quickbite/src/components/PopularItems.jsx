@@ -35,7 +35,7 @@ const PopularItems = () => {
     if (items.length === 0) return null;
 
     return (
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 bg-gray-50/50">
+        <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-12 bg-gray-50/50">
             <div className="flex items-center gap-2 mb-6">
                 <Flame className="w-6 h-6 text-orange-500 fill-orange-500" />
                 <h2 className="text-2xl font-bold text-gray-800">Popular Near You</h2>

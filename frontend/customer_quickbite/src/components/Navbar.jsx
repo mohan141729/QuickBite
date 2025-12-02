@@ -81,17 +81,17 @@ const Navbar = () => {
             <div className="flex items-center gap-4">
               {/* Delivery Location */}
               {user && (
-                <div className="relative hidden lg:block">
+                <div className="relative">
                   <button
                     onClick={() => setShowDeliveryCard(!showDeliveryCard)}
                     className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-100 transition"
                   >
                     <MapPin className="w-4 h-4 text-[#FC8019]" />
                     <div className="text-left leading-tight">
-                      <h1 className="font-medium text-sm text-gray-800">
+                      <h1 className="font-medium text-sm text-gray-800 hidden sm:block">
                         Deliver to
                       </h1>
-                      <p className="text-xs text-gray-500 font-normal truncate w-24">
+                      <p className="text-xs text-gray-500 font-normal truncate w-20 sm:w-24">
                         {user?.address?.[0]?.city || "Select location"}
                       </p>
                     </div>

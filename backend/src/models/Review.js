@@ -20,13 +20,23 @@ const reviewSchema = new mongoose.Schema(
         },
         comment: {
             type: String,
-            required: true,
             trim: true,
         },
         order: {
             type: mongoose.Schema.Types.ObjectId,
             ref: "Order",
         },
+        items: [{
+            menuItem: {
+                type: mongoose.Schema.Types.ObjectId,
+                ref: "MenuItem"
+            },
+            rating: {
+                type: Number,
+                min: 1,
+                max: 5
+            }
+        }],
     },
     { timestamps: true }
 );

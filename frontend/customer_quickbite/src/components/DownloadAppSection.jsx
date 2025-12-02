@@ -4,7 +4,7 @@ import { Smartphone, Star } from "lucide-react"
 const DownloadAppSection = () => {
     return (
         <section className="py-20 bg-gradient-to-br from-[#FFF8F2] to-white relative overflow-hidden">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
                 <div className="flex flex-col md:flex-row items-center justify-between gap-12">
 
                     {/* Text Content */}

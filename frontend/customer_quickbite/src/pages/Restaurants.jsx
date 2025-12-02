@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import RestaurantCard from "../components/RestaurantCard";
+import MenuItemCard from "../components/MenuItemCard";
 import FilterPanel from "../components/FilterPanel";
 import api from "../api/api";
 import { Search } from "lucide-react";
@@ -9,6 +10,7 @@ import { Search } from "lucide-react";
 const Restaurants = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [restaurants, setRestaurants] = useState([]);
+  const [dishes, setDishes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState(searchParams.get('q') || '');
 
@@ -38,9 +40,21 @@ const Restaurants = () => {
 
         const res = await api.get(endpoint, { params });
 
+        // Handle new response format { restaurants, dishes } or old format [restaurants]
+        let restaurantData = [];
+        let dishData = [];
+
+        if (Array.isArray(res.data)) {
+          restaurantData = res.data;
+        } else {
+          restaurantData = res.data.restaurants || [];
+          dishData = res.data.dishes || [];
+        }
+
         // Filter only approved restaurants
-        const approved = res.data.filter(r => r.status === 'approved');
+        const approved = restaurantData.filter(r => r.status === 'approved');
         setRestaurants(approved);
+        setDishes(dishData);
       } catch (error) {
         console.error("Failed to fetch restaurants:", error);
       } finally {
@@ -135,13 +149,6 @@ const Restaurants = () => {
               />
             </div>
 
-            {/* Results Header */}
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-2xl font-bold text-gray-800">
-                {loading ? "Loading..." : `${restaurants.length} Restaurants`}
-              </h2>
-            </div>
-
             {/* Loading State */}
             {loading && (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -155,22 +162,50 @@ const Restaurants = () => {
               </div>
             )}
 
-            {/* Results Grid */}
-            {!loading && restaurants.length > 0 && (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {restaurants.map((restaurant) => (
-                  <RestaurantCard key={restaurant._id} restaurant={restaurant} />
-                ))}
-              </div>
+            {!loading && (
+              <>
+                {/* Matching Dishes Section */}
+                {dishes.length > 0 && (
+                  <div className="mb-12">
+                    <h2 className="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-2">
+                      Matching Dishes <span className="text-sm font-normal text-gray-500 bg-gray-100 px-2 py-1 rounded-full">{dishes.length}</span>
+                    </h2>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      {dishes.map((dish) => (
+                        <MenuItemCard key={dish._id} item={dish} />
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Restaurants Section */}
+                <div>
+                  <h2 className="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-2">
+                    Restaurants <span className="text-sm font-normal text-gray-500 bg-gray-100 px-2 py-1 rounded-full">{restaurants.length}</span>
+                  </h2>
+
+                  {restaurants.length > 0 ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                      {restaurants.map((restaurant) => (
+                        <RestaurantCard key={restaurant._id} restaurant={restaurant} />
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-8 bg-gray-50 rounded-xl border border-gray-100">
+                      <p className="text-gray-500">No restaurants found matching your criteria.</p>
+                    </div>
+                  )}
+                </div>
+              </>
             )}
 
-            {/* Empty State */}
-            {!loading && restaurants.length === 0 && (
+            {/* Empty State (Both Empty) */}
+            {!loading && restaurants.length === 0 && dishes.length === 0 && (
               <div className="text-center py-16">
                 <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
                   <Search className="w-12 h-12 text-gray-400" />
                 </div>
-                <h3 className="text-xl font-semibold text-gray-800 mb-2">No restaurants found</h3>
+                <h3 className="text-xl font-semibold text-gray-800 mb-2">No results found</h3>
                 <p className="text-gray-500 mb-4">Try adjusting your filters or search query</p>
                 <button
                   onClick={handleClearFilters}
