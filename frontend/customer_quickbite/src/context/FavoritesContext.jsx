@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { getFavorites, addRestaurantToFavorites, removeRestaurantFromFavorites, addMenuItemToFavorites, removeMenuItemFromFavorites } from '../api/favorites';
 import { useAuth } from './AuthContext';

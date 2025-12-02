@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react"
 import { X, CheckCircle2, Bike, UtensilsCrossed, Clock } from "lucide-react"
-import { motion, AnimatePresence } from "framer-motion"
+import { motion, AnimatePresence } from "framer-motion" // eslint-disable-line no-unused-vars
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet'
 import 'leaflet/dist/leaflet.css'
 import { useSocket } from "../context/SocketContext"

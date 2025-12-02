@@ -1,8 +1,9 @@
 import { Routes, Route, Navigate } from "react-router-dom"
-import { lazy, Suspense, useState, useEffect } from "react"
+import { lazy, Suspense } from "react"
 import ProtectedRoute from "./components/ProtectedRoute"
 import SupportButton from "./components/SupportButton"
 import LoadingScreen from "./components/LoadingScreen"
+import { useAuth } from "./context/AuthContext"
 
 // Lazy load pages
 const HomePage = lazy(() => import("./pages/HomePage"))

@@ -1,4 +1,4 @@
-/* eslint-disable react-refresh/only-export-components */
+/* eslint-disable no-unused-vars */
 import React, { useState, useEffect } from "react";
 import { ChevronLeft, ChevronRight, Tag, Copy, Check } from "lucide-react";
 import { getAllCoupons } from "../api/coupons";
@@ -48,7 +48,7 @@ const OffersCarousel = () => {
 
     if (coupons.length === 0) return null;
 
-    const currentCoupon = coupons[currentIndex];
+
 
     return (
         <section
