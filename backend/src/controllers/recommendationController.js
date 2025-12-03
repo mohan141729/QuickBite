@@ -92,7 +92,7 @@ export const getPopularItems = async (req, res) => {
         // Populate details for these items and filter by approved restaurants
         const itemIds = popularItems.map(item => item._id);
         const items = await MenuItem.find({ _id: { $in: itemIds }, isAvailable: true })
-            .populate("restaurant", "name location rating image status");
+            .populate("restaurant", "name location rating image status operatingHours isOpen");
 
         // ✅ Filter to only include items from approved restaurants
         const approvedRestaurantItems = items.filter(

@@ -98,7 +98,7 @@ const Navbar = () => {
                   </button>
 
                   {showDeliveryCard && (
-                    <div className="fixed inset-0 z-[999] flex items-center justify-center bg-black/50 md:absolute md:inset-auto md:top-full md:right-0 md:mt-2 md:bg-transparent md:block md:w-auto p-4 md:p-0">
+                    <div className="fixed top-16 inset-x-0 bottom-0 z-[499] flex items-start justify-center bg-black/50 pt-4 md:absolute md:inset-auto md:top-full md:right-0 md:mt-2 md:bg-transparent md:block md:w-auto md:p-0">
                       {/* Backdrop click to close for mobile is handled by the parent div's padding/centering, but we need to ensure clicking the card doesn't close it. 
                           Actually, clicking the bg-black/50 should close it. 
                           The current implementation puts the card inside this div. 
