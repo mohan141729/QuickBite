@@ -14,6 +14,7 @@ const RestaurantPage = () => {
     const [menuItems, setMenuItems] = useState([])
     const [loading, setLoading] = useState(true)
     const [activeCategory, setActiveCategory] = useState("Recommended")
+    const [searchQuery, setSearchQuery] = useState("")
 
     useEffect(() => {
         const fetchData = async () => {
@@ -34,8 +35,14 @@ const RestaurantPage = () => {
     if (loading) return <div className="flex justify-center items-center h-screen"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500"></div></div>
     if (!restaurant) return <div className="text-center mt-20">Restaurant not found</div>
 
+    // Filter items based on search query
+    const filteredItems = menuItems.filter(item =>
+        item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        item.description.toLowerCase().includes(searchQuery.toLowerCase())
+    )
+
     // Group items by category
-    const groupedMenu = menuItems.reduce((acc, item) => {
+    const groupedMenu = filteredItems.reduce((acc, item) => {
         const category = item.category || "Others"
         if (!acc[category]) acc[category] = []
         acc[category].push(item)
@@ -156,6 +163,8 @@ const RestaurantPage = () => {
                                 type="text"
                                 placeholder="Search in menu..."
                                 className="flex-1 outline-none text-gray-700 placeholder:text-gray-400"
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
                             />
                         </div>
 

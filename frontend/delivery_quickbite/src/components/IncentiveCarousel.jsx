@@ -107,14 +107,29 @@ const IncentiveCarousel = ({ stats }) => {
                     // Dynamically select icon if needed, or default to Gift
                     const Icon = Gift;
 
-                    // Robust check: Ensure color is a valid gradient string, otherwise fallback
-                    const hasValidGradient = incentive.color && incentive.color.includes('from-');
-                    const gradientColor = hasValidGradient ? incentive.color : "from-orange-500 to-red-600";
+                    // Robust color handling
+                    let backgroundStyle = {};
+                    let backgroundClass = "bg-gradient-to-br from-orange-500 to-red-600"; // Default fallback
+
+                    if (incentive.color) {
+                        if (incentive.color.startsWith("#") || incentive.color.startsWith("rgb")) {
+                            // Hex or RGB color
+                            backgroundStyle = { background: incentive.color };
+                            backgroundClass = ""; // Remove default class if using style
+                        } else if (incentive.color.includes("from-")) {
+                            // Tailwind Gradient
+                            backgroundClass = `bg-gradient-to-br ${incentive.color}`;
+                        } else if (incentive.color.startsWith("bg-")) {
+                            // Tailwind Solid Color
+                            backgroundClass = incentive.color;
+                        }
+                    }
 
                     return (
                         <div
                             key={incentive._id}
-                            className={`w-80 p-5 rounded-2xl bg-orange-500 bg-gradient-to-br ${gradientColor} text-white shadow-lg transform transition-all hover:scale-[1.02] active:scale-95 relative overflow-hidden ${!isActiveNow ? 'opacity-60 grayscale-[0.5]' : ''}`}
+                            className={`w-80 p-5 rounded-2xl text-white shadow-lg transform transition-all hover:scale-[1.02] active:scale-95 relative overflow-hidden ${backgroundClass} ${!isActiveNow ? 'opacity-60 grayscale-[0.5]' : ''}`}
+                            style={backgroundStyle}
                         >
                             {/* Background Pattern */}
                             <div className="absolute top-0 right-0 w-32 h-32 bg-white opacity-10 rounded-bl-full -mr-8 -mt-8" />

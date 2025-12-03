@@ -98,10 +98,21 @@ const Navbar = () => {
                   </button>
 
                   {showDeliveryCard && (
-                    <div className="absolute top-full right-0 mt-2 z-[200] animate-slide-down">
-                      <DeliveryLocationCard
-                        onClose={() => setShowDeliveryCard(false)}
-                      />
+                    <div className="fixed inset-0 z-[999] flex items-center justify-center bg-black/50 md:absolute md:inset-auto md:top-full md:right-0 md:mt-2 md:bg-transparent md:block md:w-auto p-4 md:p-0">
+                      {/* Backdrop click to close for mobile is handled by the parent div's padding/centering, but we need to ensure clicking the card doesn't close it. 
+                          Actually, clicking the bg-black/50 should close it. 
+                          The current implementation puts the card inside this div. 
+                          If I click the div (backdrop), it should close. 
+                          But I can't easily distinguish click on backdrop vs card without a separate backdrop element or event propagation check.
+                          
+                          Let's use a separate backdrop for mobile.
+                      */}
+                      <div className="absolute inset-0 md:hidden" onClick={() => setShowDeliveryCard(false)}></div>
+                      <div className="relative z-10 w-full max-w-sm md:w-auto">
+                        <DeliveryLocationCard
+                          onClose={() => setShowDeliveryCard(false)}
+                        />
+                      </div>
                     </div>
                   )}
                 </div>

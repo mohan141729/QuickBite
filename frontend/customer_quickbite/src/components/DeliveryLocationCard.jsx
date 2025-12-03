@@ -65,7 +65,7 @@ const DeliveryLocationCard = ({ onClose }) => {
   }
 
   return (
-    <div className="absolute right-4 top-[4.2rem] w-80 bg-white border border-gray-200 rounded-xl shadow-2xl animate-slide-in z-[999]">
+    <div className="w-full max-w-sm md:w-80 bg-white border border-gray-200 rounded-xl shadow-2xl animate-slide-in overflow-hidden">
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100">
         <h2 className="text-sm font-semibold text-gray-800 flex items-center gap-2">

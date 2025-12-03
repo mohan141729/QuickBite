@@ -5,6 +5,8 @@ import { Flame, ShoppingBag } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import toast from 'react-hot-toast';
 
+import { isRestaurantOpen } from '../utils/timeUtils';
+
 const PopularItems = () => {
     const [items, setItems] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -42,37 +44,54 @@ const PopularItems = () => {
             </div>
 
             <div className="flex overflow-x-auto pb-4 gap-6 scrollbar-hide">
-                {items.map((item) => (
-                    <Link to={`/restaurant/${item.restaurant._id}`} key={item._id} className="min-w-[260px] md:min-w-[300px] bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-300 border border-gray-100 flex flex-col">
-                        <div className="relative h-48 overflow-hidden rounded-t-xl">
-                            <img
-                                src={item.image || "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=500&q=80"}
-                                alt={item.name}
-                                className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
-                            />
-                            {item.restaurant && (
-                                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-3">
-                                    <p className="text-white text-xs font-medium truncate">By {item.restaurant.name}</p>
-                                </div>
-                            )}
-                        </div>
-                        <div className="p-4 flex flex-col flex-grow">
-                            <div className="flex justify-between items-start mb-1">
-                                <h3 className="text-lg font-bold text-gray-900 line-clamp-1">{item.name}</h3>
-                                <span className="font-bold text-green-600">₹{item.price}</span>
-                            </div>
-                            <p className="text-gray-500 text-sm line-clamp-2 mb-4 flex-grow">{item.description}</p>
+                {items.map((item) => {
+                    const isOpen = item.restaurant ? isRestaurantOpen(item.restaurant) : true;
+                    const isAvailable = item.isAvailable !== false;
+                    const isDisabled = !isOpen || !isAvailable;
 
-                            <button
-                                onClick={(e) => handleAddToCart(e, item)}
-                                className="w-full mt-auto bg-orange-50 text-orange-600 hover:bg-orange-100 py-2 rounded-lg font-medium text-sm transition-colors flex items-center justify-center gap-2"
-                            >
-                                <ShoppingBag className="w-4 h-4" />
-                                Add to Cart
-                            </button>
-                        </div>
-                    </Link>
-                ))}
+                    return (
+                        <Link to={`/restaurant/${item.restaurant._id}`} key={item._id} className="min-w-[260px] md:min-w-[300px] bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-300 border border-gray-100 flex flex-col group">
+                            <div className="relative h-48 overflow-hidden rounded-t-xl">
+                                <img
+                                    src={item.image || "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=500&q=80"}
+                                    alt={item.name}
+                                    className={`w-full h-full object-cover transition-transform duration-500 ${isDisabled ? 'grayscale' : 'group-hover:scale-105'}`}
+                                />
+                                {item.restaurant && (
+                                    <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-3">
+                                        <p className="text-white text-xs font-medium truncate">By {item.restaurant.name}</p>
+                                    </div>
+                                )}
+                                {isDisabled && (
+                                    <div className="absolute top-3 right-3 z-10">
+                                        <span className="bg-gray-800/80 text-white text-xs font-bold px-3 py-1 rounded-full backdrop-blur-sm">
+                                            {!isOpen ? "CLOSED" : "UNAVAILABLE"}
+                                        </span>
+                                    </div>
+                                )}
+                            </div>
+                            <div className="p-4 flex flex-col flex-grow">
+                                <div className="flex justify-between items-start mb-1">
+                                    <h3 className="text-lg font-bold text-gray-900 line-clamp-1">{item.name}</h3>
+                                    <span className="font-bold text-green-600">₹{item.price}</span>
+                                </div>
+                                <p className="text-gray-500 text-sm line-clamp-2 mb-4 flex-grow">{item.description}</p>
+
+                                <button
+                                    onClick={(e) => !isDisabled && handleAddToCart(e, item)}
+                                    disabled={isDisabled}
+                                    className={`w-full mt-auto py-2 rounded-lg font-medium text-sm transition-colors flex items-center justify-center gap-2 ${isDisabled
+                                        ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                                        : "bg-orange-50 text-orange-600 hover:bg-orange-100"
+                                        }`}
+                                >
+                                    <ShoppingBag className="w-4 h-4" />
+                                    {isDisabled ? (!isOpen ? "Restaurant Closed" : "Unavailable") : "Add to Cart"}
+                                </button>
+                            </div>
+                        </Link>
+                    );
+                })}
             </div>
         </div>
     );
