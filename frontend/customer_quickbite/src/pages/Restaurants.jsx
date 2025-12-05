@@ -6,6 +6,7 @@ import MenuItemCard from "../components/MenuItemCard";
 import FilterPanel from "../components/FilterPanel";
 import api from "../api/api";
 import { Search } from "lucide-react";
+import { isRestaurantOpen } from "../utils/timeUtils";
 
 const Restaurants = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -192,9 +193,16 @@ const Restaurants = () => {
                       Matching Dishes <span className="text-sm font-normal text-gray-500 bg-gray-100 px-2 py-1 rounded-full">{dishes.length}</span>
                     </h2>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      {dishes.map((dish) => (
-                        <MenuItemCard key={dish._id} item={dish} />
-                      ))}
+                      {dishes.map((dish) => {
+                        const isOpen = isRestaurantOpen(dish.restaurant);
+                        return (
+                          <MenuItemCard
+                            key={dish._id}
+                            item={dish}
+                            disabled={!isOpen}
+                          />
+                        );
+                      })}
                     </div>
                   </div>
                 )}

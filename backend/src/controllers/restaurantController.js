@@ -135,7 +135,7 @@ export const searchAndFilterRestaurants = async (req, res) => {
     let dishes = [];
     if (q || veg === 'true' || rating) {
       dishes = await MenuItem.find(dishQuery)
-        .populate('restaurant', 'name image location isSurgeActive deliveryRadius')
+        .populate('restaurant', 'name image location isSurgeActive deliveryRadius operatingHours isOpen')
         .limit(20); // Limit results to avoid overwhelming response
     }
 

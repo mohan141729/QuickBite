@@ -1,5 +1,7 @@
 import Cart from "../models/Cart.js";
 import MenuItem from "../models/MenuItem.js";
+import Restaurant from "../models/Restaurant.js";
+import { isRestaurantOpen } from "../utils/timeUtils.js";
 
 // Helper to recalculate total price
 const recalcTotal = async (cart) => {
@@ -64,6 +66,20 @@ export const addToCart = async (req, res) => {
     const menuItem = await MenuItem.findById(menuItemId);
     if (!menuItem) {
       return res.status(404).json({ success: false, message: "Menu item not found" });
+    }
+
+    // Check if restaurant is open
+    const restaurant = await Restaurant.findById(restaurantId);
+    if (!restaurant) {
+      return res.status(404).json({ success: false, message: "Restaurant not found" });
+    }
+
+    if (!isRestaurantOpen(restaurant)) {
+      return res.status(400).json({
+        success: false,
+        message: "This restaurant is currently closed.",
+        code: "RESTAURANT_CLOSED"
+      });
     }
 
     let cart = await Cart.findOne({ user: req.user._id });
