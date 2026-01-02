@@ -79,6 +79,21 @@ export const getRestaurants = async (req, res) => {
   }
 };
 
+// ✅ Get restaurants for the authenticated owner
+export const getMyRestaurants = async (req, res) => {
+  try {
+    if (!req.user || req.user.role !== 'restaurant_owner') {
+      return res.status(403).json({ message: "Access denied. Owners only." });
+    }
+
+    const restaurants = await Restaurant.find({ owner: req.user._id });
+    res.json(restaurants);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+
 // ✅ Search and Filter Restaurants (for customer discovery)
 export const searchAndFilterRestaurants = async (req, res) => {
   try {

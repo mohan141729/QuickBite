@@ -6,13 +6,12 @@ import { useNavigate } from "react-router-dom"
 import CartItemCard from "./CartItemCard"
 
 const CartDrawer = () => {
-  const [isOpen, setIsOpen] = useState(false)
-  const { cartItems, total, clearCart } = useCart()
+  const { cartItems, total, clearCart, isCartOpen, openCart, closeCart } = useCart()
   const { user } = useAuth()
   const navigate = useNavigate()
 
   const handleCheckout = () => {
-    setIsOpen(false)
+    closeCart()
     if (user) navigate("/checkout")
     else navigate("/login")
   }
@@ -21,7 +20,7 @@ const CartDrawer = () => {
     <>
       {/* Floating Cart Button */}
       <button
-        onClick={() => setIsOpen(true)}
+        onClick={openCart}
         className="relative flex items-center justify-center p-2 rounded-lg hover:bg-orange-50 transition"
       >
         <ShoppingCart className="w-5 h-5 text-gray-800" />
@@ -33,10 +32,10 @@ const CartDrawer = () => {
       </button>
 
       {/* Drawer Overlay */}
-      {isOpen && (
+      {isCartOpen && (
         <div
           className="fixed inset-0 z-[2000] bg-black/50 backdrop-blur-sm flex justify-center sm:justify-end"
-          onClick={(e) => e.target === e.currentTarget && setIsOpen(false)}
+          onClick={(e) => e.target === e.currentTarget && closeCart()}
         >
           {/* Drawer Panel */}
           <div
@@ -49,7 +48,7 @@ const CartDrawer = () => {
                 Your Cart
               </h2>
               <button
-                onClick={() => setIsOpen(false)}
+                onClick={closeCart}
                 className="p-2 rounded-full hover:bg-gray-100 transition"
               >
                 <X className="w-5 h-5 text-gray-600" />

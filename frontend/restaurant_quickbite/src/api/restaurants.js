@@ -6,6 +6,12 @@ export const getRestaurants = async () => {
   return Array.isArray(res.data) ? res.data : res.data.restaurants || [];
 };
 
+// Get authenticated owner's restaurants
+export const getMyRestaurants = async () => {
+  const res = await api.get("/api/restaurants/my/all");
+  return Array.isArray(res.data) ? res.data : res.data.restaurants || [];
+};
+
 // Get restaurant by ID
 export const getRestaurantById = async (id) => {
   const res = await api.get(`/api/restaurants/${id}`);

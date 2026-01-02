@@ -180,7 +180,11 @@ const RestaurantPage = () => {
                                         </h2>
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                             {items.map(item => (
-                                                <MenuItemCard key={item._id} item={item} disabled={!isOpen} />
+                                                <MenuItemCard
+                                                    key={item._id}
+                                                    item={{ ...item, restaurant: restaurant }}
+                                                    disabled={!isOpen}
+                                                />
                                             ))}
                                         </div>
                                     </div>

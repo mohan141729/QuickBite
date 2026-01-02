@@ -33,15 +33,17 @@ const ItemCustomizationModal = ({ item, onClose }) => {
         return (total + addOnsTotal) * quantity;
     };
 
-    const handleAddToCart = () => {
+    const handleAddToCart = async () => {
         const customizedItem = {
             ...item,
             selectedVariant,
             selectedAddOns,
         };
-        addToCart(customizedItem, quantity);
-        toast.success("Item added to cart");
-        onClose();
+        const success = await addToCart(customizedItem, quantity);
+        if (success) {
+            toast.success("Item added to cart");
+            onClose();
+        }
     };
 
     return (
@@ -69,8 +71,8 @@ const ItemCustomizationModal = ({ item, onClose }) => {
                                     <label
                                         key={idx}
                                         className={`flex items-center justify-between p-3 rounded-lg border cursor-pointer transition-all ${selectedVariant?.name === variant.name
-                                                ? "border-orange-500 bg-orange-50"
-                                                : "border-gray-200"
+                                            ? "border-orange-500 bg-orange-50"
+                                            : "border-gray-200"
                                             }`}
                                     >
                                         <div className="flex items-center gap-3">

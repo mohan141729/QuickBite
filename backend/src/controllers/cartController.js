@@ -104,12 +104,20 @@ export const addToCart = async (req, res) => {
     const existingItemIndex = cart.items.findIndex(item => {
       const isSameItem = item.menuItem.toString() === menuItemId;
 
-      // Simple variant check (assuming name uniqueness or object equality if structure matches)
-      const isSameVariant = JSON.stringify(item.selectedVariant) === JSON.stringify(selectedVariant);
+      // Compare variants
+      const v1 = item.selectedVariant;
+      const v2 = selectedVariant;
+      const isSameVariant = (!v1 && !v2) || (v1 && v2 && v1.name === v2.name && v1.price === v2.price);
 
-      // Simple addons check (sort and stringify to compare arrays)
-      const currentAddOns = item.selectedAddOns ? [...item.selectedAddOns].sort((a, b) => a.name.localeCompare(b.name)) : [];
-      const newAddOns = selectedAddOns ? [...selectedAddOns].sort((a, b) => a.name.localeCompare(b.name)) : [];
+      // Compare addons (normalize by name and price, ignore _id)
+      const normalizeAddOns = (addons) => {
+        if (!addons || addons.length === 0) return [];
+        return addons.map(a => `${a.name}|${a.price}`).sort();
+      };
+
+      const currentAddOns = normalizeAddOns(item.selectedAddOns);
+      const newAddOns = normalizeAddOns(selectedAddOns);
+
       const isSameAddOns = JSON.stringify(currentAddOns) === JSON.stringify(newAddOns);
 
       return isSameItem && isSameVariant && isSameAddOns;

@@ -1,5 +1,6 @@
 
 import React, { createContext, useContext, useState, useEffect } from "react"
+import { toast } from "react-hot-toast"
 import { useAuth } from "./AuthContext"
 import {
   fetchCart,
@@ -14,7 +15,12 @@ const CartContext = createContext()
 export const CartProvider = ({ children }) => {
   const [cartItems, setCartItems] = useState([])
   const [total, setTotal] = useState(0)
+
   const [loading, setLoading] = useState(false)
+  const [isCartOpen, setIsCartOpen] = useState(false)
+
+  const openCart = () => setIsCartOpen(true)
+  const closeCart = () => setIsCartOpen(false)
 
   const normalizeItems = (items = []) =>
     items.map((i) => ({
@@ -60,6 +66,11 @@ export const CartProvider = ({ children }) => {
 
   // ➕ Add item
   const addToCart = async (menuItem, quantity = 1) => {
+    if (!user) {
+      toast.error("Please login to add items to cart")
+      return false
+    }
+
     try {
       // Extract customizations if present
       const selectedVariant = menuItem.selectedVariant || null;
@@ -70,15 +81,24 @@ export const CartProvider = ({ children }) => {
 
       if (!restaurantId) {
         console.error("Missing restaurant ID for item:", menuItem);
-        return;
+        toast.error("Internal Error: Missing restaurant information. Please refresh.");
+        return false;
       }
 
       const updatedCart = await addToCartAPI(menuItem._id, quantity, restaurantId, selectedVariant, selectedAddOns)
       const items = updatedCart?.cart?.items || updatedCart?.items || []
-      setCartItems(normalizeItems(items))
+      console.log("🛒 Raw Cart Items from Backend:", items);
+      const normalized = normalizeItems(items);
+      console.log("🛒 Normalized Items:", normalized);
+      setCartItems(normalized)
       setTotal(updatedCart?.cart?.totalPrice || updatedCart?.totalPrice || 0)
+      setIsCartOpen(true) // Auto-open cart
+      return true
     } catch (err) {
       console.error("Failed to add to cart:", err)
+      const message = err.response?.data?.message || "Failed to add to cart";
+      toast.error(message);
+      return false
     }
   }
 
@@ -129,6 +149,9 @@ export const CartProvider = ({ children }) => {
         updateCartItem,
         removeFromCart,
         clearCart,
+        isCartOpen,
+        openCart,
+        closeCart
       }}
     >
       {children}

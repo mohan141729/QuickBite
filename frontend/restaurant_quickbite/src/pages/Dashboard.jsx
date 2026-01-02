@@ -3,7 +3,7 @@ import Navbar from "../components/Navbar";
 import AddRestaurantModal from "../components/AddRestaurantModal";
 import EditRestaurantModal from "../components/EditRestaurantModal";
 import RestaurantCard from "../components/RestaurantCard";
-import { getRestaurants, deleteRestaurant, updateRestaurant } from "../api/restaurants";
+import { getRestaurants, getMyRestaurants, deleteRestaurant, updateRestaurant } from "../api/restaurants";
 import { PlusCircle } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
@@ -22,8 +22,13 @@ const Dashboard = () => {
   useEffect(() => {
     const loadRestaurants = async () => {
       try {
-        const data = await getRestaurants();
-        // Backend already filters by owner for restaurant_owner role
+        let data;
+        if (user?.role === "restaurant_owner") {
+          // Use the protected route for owners
+          data = await getMyRestaurants();
+        } else {
+          data = await getRestaurants();
+        }
         setRestaurants(data);
       } catch (err) {
         console.error("❌ Failed to load restaurants:", err);
@@ -32,7 +37,9 @@ const Dashboard = () => {
         setLoading(false);
       }
     };
-    loadRestaurants();
+    if (user) {
+      loadRestaurants();
+    }
   }, [user, refreshKey]);
 
   const handleDelete = async (id) => {

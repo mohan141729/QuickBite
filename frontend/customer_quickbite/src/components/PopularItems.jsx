@@ -27,10 +27,12 @@ const PopularItems = () => {
         fetchItems();
     }, []);
 
-    const handleAddToCart = (e, item) => {
+    const handleAddToCart = async (e, item) => {
         e.preventDefault(); // Prevent navigation if clicking the button
-        addToCart(item, 1);
-        toast.success(`Added ${item.name} to cart!`);
+        const success = await addToCart(item, 1);
+        if (success) {
+            toast.success(`Added ${item.name} to cart!`);
+        }
     };
 
     if (loading) return null;

@@ -9,6 +9,7 @@ import {
   getAllRestaurantsAdmin,
   updateRestaurantStatus,
   updateCategory,
+  getMyRestaurants, // New controller function
 } from "../controllers/restaurantController.js";
 import { clerkAuth, requireRole, optionalAuth, attemptAuth } from "../middleware/clerkAuth.js";
 
@@ -20,6 +21,7 @@ router.get("/:id", getRestaurantById);
 router.get("/", attemptAuth, optionalAuth, getRestaurants); // Optional auth - works for both authenticated and unauthenticated users
 
 // Protected routes - restaurant owners only
+router.get("/my/all", clerkAuth, requireRole(['restaurant_owner']), getMyRestaurants); // New specific route for owners
 router.post("/", clerkAuth, requireRole(['restaurant_owner']), createRestaurant);
 router.put("/:id", clerkAuth, requireRole(['restaurant_owner']), updateRestaurant);
 router.put("/:id/categories", clerkAuth, requireRole(['restaurant_owner']), updateCategory);

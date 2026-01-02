@@ -1,5 +1,6 @@
 import { Routes, Route, Navigate } from "react-router-dom"
 import { lazy, Suspense } from "react"
+import { Toaster } from "react-hot-toast"
 import ProtectedRoute from "./components/ProtectedRoute"
 import SupportButton from "./components/SupportButton"
 import LoadingScreen from "./components/LoadingScreen"
@@ -27,6 +28,7 @@ const App = () => {
 
   return (
     <>
+      <Toaster position="top-center" />
       <Suspense fallback={<LoadingScreen />}>
         <Routes>
           {/* Public Routes */}
